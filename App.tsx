@@ -217,9 +217,9 @@ const App: React.FC = () => {
         {activeTab === 'job' && (
           <div className="px-4">
             {!extractedJob ? (
-              <JobOpportunityExtractor onExtracted={setExtractedJob} />
+              <JobOpportunityExtractor onExtracted={setExtractedJob} careerData={processedData} />
             ) : (
-              <JobOpportunityView job={extractedJob} onReset={() => setExtractedJob(null)} />
+              <JobOpportunityView job={extractedJob} onReset={() => setExtractedJob(null)} onAnalyzeFit={() => setActiveTab('match')} />
             )}
           </div>
         )}

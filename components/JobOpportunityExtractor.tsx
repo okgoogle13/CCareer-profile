@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { JobOpportunity } from '../types';
+import { JobOpportunity, CareerDatabase } from '../types';
 import { extractJobOpportunity } from '../services/geminiService';
 
 interface JobOpportunityExtractorProps {
   onExtracted: (job: JobOpportunity) => void;
+  careerData?: CareerDatabase | null;
 }
 
-export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = ({ onExtracted }) => {
+export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = ({ onExtracted, careerData }) => {
   const [inputType, setInputType] = useState<'url' | 'text'>('url');
   const [url, setUrl] = useState('');
   const [text, setText] = useState('');
@@ -43,7 +44,7 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
         sourceUrl = 'Pasted Text';
       }
 
-      const job = await extractJobOpportunity(contentToProcess, sourceUrl);
+      const job = await extractJobOpportunity(contentToProcess, sourceUrl, careerData || undefined);
       onExtracted(job);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');

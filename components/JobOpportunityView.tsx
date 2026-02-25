@@ -97,6 +97,19 @@ export const JobOpportunityView: React.FC<JobOpportunityViewProps> = ({ job, onR
           </div>
         )}
 
+        {job.Suggested_Skills && job.Suggested_Skills.length > 0 && (
+          <div>
+            <h3 className="text-lg font-bold text-cyan-300 mb-3 border-b border-gray-700 pb-2">Suggested Skills (Based on Your Profile)</h3>
+            <div className="flex flex-wrap gap-2">
+              {job.Suggested_Skills.map((skill, i) => (
+                <span key={i} className="bg-amber-900/40 text-amber-300 border border-amber-700/30 px-3 py-1 rounded-full text-sm">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {job.Company_Culture_Keywords.length > 0 && (
           <div>
             <h3 className="text-lg font-bold text-cyan-300 mb-3 border-b border-gray-700 pb-2">Company Culture</h3>

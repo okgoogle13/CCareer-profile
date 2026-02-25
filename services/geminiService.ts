@@ -145,9 +145,9 @@ export const generateEmbeddings = async (text: string): Promise<number[]> => {
     try {
         const response = await ai.models.embedContent({
             model: 'text-embedding-004',
-            content: { parts: [{ text }] }
+            contents: text
         });
-        return response.embedding.values;
+        return response.embeddings?.[0]?.values || [];
     } catch (e) {
         console.warn("Embedding generation failed for text segment:", e);
         return [];
@@ -399,7 +399,7 @@ export const analyzeFitAndGenerateDrafts = async (
     return JSON.parse(jsonString) as MatchAnalysis;
 };
 
-export const extractJobOpportunity = async (htmlContent: string, sourceUrl: string): Promise<JobOpportunity> => {
+export const extractJobOpportunity = async (htmlContent: string, sourceUrl: string, careerData?: CareerDatabase): Promise<JobOpportunity> => {
     const prompt = `
       You are an expert technical recruiter and data analyst.
       Analyze the following HTML content of a job posting and extract the key particulars into a structured JSON format.
@@ -409,6 +409,13 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
       HTML Content:
       ${htmlContent.substring(0, 30000)} // Truncate to avoid token limits if too large
       
+      ${careerData ? `
+      Additionally, you have access to the user's Career Database:
+      ${JSON.stringify(careerData.Master_Skills_Inventory)}
+      
+      Based on the job requirements and the user's skills, suggest potential skills the user might have that are relevant to this job but might not be explicitly listed in their database or could be highlighted.
+      ` : ''}
+
       Extract the following fields:
       - Job_Title: The official title of the position.
       - Company_Name: The name of the hiring company.
@@ -419,6 +426,7 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
       - Required_Hard_Skills: An array of mandatory technical/hard skills.
       - Required_Soft_Skills: An array of mandatory soft skills.
       - Preferred_Skills: An array of "nice-to-have" or bonus skills.
+      ${careerData ? '- Suggested_Skills: An array of skills the user might have based on their career database that are relevant to this job.' : ''}
       - Required_Experience: The required years of experience or seniority level.
       - Company_Culture_Keywords: An array of words describing the company culture or values.
       - Red_Flags: An array of potential red flags (e.g., "fast-paced environment", "wear many hats", "unlimited PTO").
@@ -438,6 +446,7 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
             Required_Hard_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
             Required_Soft_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
             Preferred_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
+            ...(careerData ? { Suggested_Skills: { type: Type.ARRAY, items: { type: Type.STRING } } } : {}),
             Required_Experience: { type: Type.STRING },
             Company_Culture_Keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
             Red_Flags: { type: Type.ARRAY, items: { type: Type.STRING } },

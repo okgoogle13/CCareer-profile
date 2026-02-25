@@ -119,6 +119,7 @@ export interface JobOpportunity {
   Required_Hard_Skills: string[];
   Required_Soft_Skills: string[];
   Preferred_Skills: string[];
+  Suggested_Skills?: string[];
   Required_Experience: string;
   Company_Culture_Keywords: string[];
   Red_Flags: string[];
