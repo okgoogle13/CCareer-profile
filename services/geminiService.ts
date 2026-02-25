@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { CareerDatabase, KSCResponse, CareerEntry, StructuredAchievement, JobOpportunity } from '../types';
+import { CareerDatabase, KSCResponse, CareerEntry, StructuredAchievement, JobOpportunity, MatchAnalysis } from '../types';
 
 // Initialize the Google GenAI client with the API key from environment variables.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
@@ -337,6 +337,68 @@ export const refineAchievementField = async (ach: StructuredAchievement, field: 
     return response.text?.trim() || "";
 };
 
+export const analyzeFitAndGenerateDrafts = async (
+    job: JobOpportunity,
+    careerData: CareerDatabase
+): Promise<MatchAnalysis> => {
+    const prompt = `
+      You are an expert career coach and ATS optimization specialist.
+      Analyze the user's Career Database against the provided Job Opportunity.
+      
+      Job Opportunity:
+      ${JSON.stringify(job, null, 2)}
+      
+      User's Career Database:
+      ${JSON.stringify(careerData, null, 2)}
+      
+      Tasks:
+      1. Calculate an Overall_Fit_Score (0-100) based on how well the user's skills and experience match the job requirements.
+      2. Identify Skill_Gaps. For each required hard/soft skill in the job posting, determine the Match_Level ("Strong", "Partial", "Missing") based on the user's Master_Skills_Inventory and Career_Entries. Provide brief Evidence from the user's profile.
+      3. Write a Tailored_Summary (3-4 sentences) that the user can put at the top of their resume, specifically highlighting their most relevant experience for this exact role.
+      4. Recommend 3-5 Achievement_IDs from the user's Structured_Achievements that are most relevant to this job's Key_Responsibilities.
+      5. Draft a highly tailored Cover_Letter (3-4 paragraphs) that connects the user's specific achievements and values to the company's needs and culture keywords.
+      
+      Return the result as a JSON object matching the requested schema.
+    `;
+
+    const schema = {
+        type: Type.OBJECT,
+        properties: {
+            Overall_Fit_Score: { type: Type.NUMBER },
+            Skill_Gaps: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        Skill: { type: Type.STRING },
+                        Match_Level: { type: Type.STRING, enum: ["Strong", "Partial", "Missing"] },
+                        Evidence: { type: Type.STRING }
+                    },
+                    required: ["Skill", "Match_Level", "Evidence"]
+                }
+            },
+            Tailored_Summary: { type: Type.STRING },
+            Recommended_Achievement_IDs: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Cover_Letter_Draft: { type: Type.STRING }
+        },
+        required: ["Overall_Fit_Score", "Skill_Gaps", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft"]
+    };
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3-pro-preview', // Use Pro for complex reasoning and drafting
+        contents: { parts: [{ text: prompt }] },
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: schema,
+            temperature: 0.2,
+        }
+    });
+
+    const jsonString = response.text;
+    if (!jsonString) throw new Error("Empty response from Gemini");
+    return JSON.parse(jsonString) as MatchAnalysis;
+};
+
 export const extractJobOpportunity = async (htmlContent: string, sourceUrl: string): Promise<JobOpportunity> => {
     const prompt = `
       You are an expert technical recruiter and data analyst.
@@ -354,10 +416,12 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
       - Work_Type: One of "Remote", "Hybrid", "On-site", or "Unspecified".
       - Salary_Range: The stated salary range or compensation details (or "Not specified").
       - Key_Responsibilities: An array of the main duties and responsibilities.
-      - Required_Skills: An array of mandatory technical and soft skills.
+      - Required_Hard_Skills: An array of mandatory technical/hard skills.
+      - Required_Soft_Skills: An array of mandatory soft skills.
       - Preferred_Skills: An array of "nice-to-have" or bonus skills.
       - Required_Experience: The required years of experience or seniority level.
       - Company_Culture_Keywords: An array of words describing the company culture or values.
+      - Red_Flags: An array of potential red flags (e.g., "fast-paced environment", "wear many hats", "unlimited PTO").
       - Application_Deadline: The closing date for applications (or "Not specified").
       - Source_URL: The URL provided above.
     `;
@@ -371,14 +435,16 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
             Work_Type: { type: Type.STRING, enum: ["Remote", "Hybrid", "On-site", "Unspecified"] },
             Salary_Range: { type: Type.STRING },
             Key_Responsibilities: { type: Type.ARRAY, items: { type: Type.STRING } },
-            Required_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Required_Hard_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Required_Soft_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
             Preferred_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
             Required_Experience: { type: Type.STRING },
             Company_Culture_Keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Red_Flags: { type: Type.ARRAY, items: { type: Type.STRING } },
             Application_Deadline: { type: Type.STRING },
             Source_URL: { type: Type.STRING },
         },
-        required: ["Job_Title", "Company_Name", "Location", "Work_Type", "Salary_Range", "Key_Responsibilities", "Required_Skills", "Preferred_Skills", "Required_Experience", "Company_Culture_Keywords", "Application_Deadline", "Source_URL"]
+        required: ["Job_Title", "Company_Name", "Location", "Work_Type", "Salary_Range", "Key_Responsibilities", "Required_Hard_Skills", "Required_Soft_Skills", "Preferred_Skills", "Required_Experience", "Company_Culture_Keywords", "Red_Flags", "Application_Deadline", "Source_URL"]
     };
 
     const response = await ai.models.generateContent({
@@ -393,4 +459,61 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
     const jsonString = response.text;
     if (!jsonString) throw new Error("Empty response from Gemini");
     return JSON.parse(jsonString) as JobOpportunity;
+};
+
+export const generateMatchAnalysis = async (careerData: CareerDatabase, job: JobOpportunity): Promise<MatchAnalysis> => {
+    const prompt = `
+      You are an expert executive recruiter and career coach.
+      Analyze the candidate's Career Database against the target Job Opportunity.
+      
+      Job Opportunity:
+      ${JSON.stringify(job)}
+      
+      Candidate Career Database:
+      ${JSON.stringify(careerData)}
+      
+      Perform the following:
+      1. Calculate an Overall_Fit_Score (0-100) based on skill overlap and experience.
+      2. Perform a Skill Gap Analysis. For each Required_Skill and Preferred_Skill in the job, determine if the candidate has a "Strong", "Partial", or "Missing" match. Provide brief evidence if Strong/Partial.
+      3. Write a highly tailored Professional Summary (3-4 sentences) for the top of a resume targeting this specific role.
+      4. Select the top 5-7 most relevant Achievement_IDs from the candidate's Structured_Achievements that should be highlighted in the resume.
+      5. Draft a compelling, modern Cover Letter tailored to this company and role, drawing specific metrics and examples from the candidate's achievements.
+    `;
+
+    const schema = {
+        type: Type.OBJECT,
+        properties: {
+            Overall_Fit_Score: { type: Type.NUMBER },
+            Skill_Gaps: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        Skill: { type: Type.STRING },
+                        Match_Level: { type: Type.STRING, enum: ["Strong", "Partial", "Missing"] },
+                        Evidence: { type: Type.STRING }
+                    },
+                    required: ["Skill", "Match_Level", "Evidence"]
+                }
+            },
+            Tailored_Summary: { type: Type.STRING },
+            Recommended_Achievement_IDs: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Cover_Letter_Draft: { type: Type.STRING }
+        },
+        required: ["Overall_Fit_Score", "Skill_Gaps", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft"]
+    };
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3-pro-preview',
+        contents: { parts: [{ text: prompt }] },
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: schema,
+            temperature: 0.2,
+        }
+    });
+
+    const jsonString = response.text;
+    if (!jsonString) throw new Error("Empty response from Gemini");
+    return JSON.parse(jsonString) as MatchAnalysis;
 };

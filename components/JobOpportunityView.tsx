@@ -4,9 +4,10 @@ import { JobOpportunity } from '../types';
 interface JobOpportunityViewProps {
   job: JobOpportunity;
   onReset: () => void;
+  onAnalyzeFit: () => void;
 }
 
-export const JobOpportunityView: React.FC<JobOpportunityViewProps> = ({ job, onReset }) => {
+export const JobOpportunityView: React.FC<JobOpportunityViewProps> = ({ job, onReset, onAnalyzeFit }) => {
   return (
     <div className="max-w-4xl mx-auto p-8 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
       <div className="flex justify-between items-start mb-8">
@@ -14,12 +15,20 @@ export const JobOpportunityView: React.FC<JobOpportunityViewProps> = ({ job, onR
           <h2 className="text-3xl font-extrabold text-white mb-2">{job.Job_Title}</h2>
           <p className="text-xl text-cyan-400 font-semibold">{job.Company_Name}</p>
         </div>
-        <button
-          onClick={onReset}
-          className="text-gray-400 hover:text-white transition-colors text-sm underline"
-        >
-          Extract Another
-        </button>
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={onReset}
+            className="text-gray-400 hover:text-white transition-colors text-sm underline"
+          >
+            Extract Another
+          </button>
+          <button
+            onClick={onAnalyzeFit}
+            className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-lg shadow-cyan-500/20"
+          >
+            Analyze Fit & Generate Drafts
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -51,14 +60,27 @@ export const JobOpportunityView: React.FC<JobOpportunityViewProps> = ({ job, onR
           </ul>
         </div>
 
-        <div>
-          <h3 className="text-lg font-bold text-cyan-300 mb-3 border-b border-gray-700 pb-2">Required Skills</h3>
-          <div className="flex flex-wrap gap-2">
-            {job.Required_Skills.map((skill, i) => (
-              <span key={i} className="bg-cyan-900/40 text-cyan-300 border border-cyan-700/30 px-3 py-1 rounded-full text-sm">
-                {skill}
-              </span>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h3 className="text-lg font-bold text-cyan-300 mb-3 border-b border-gray-700 pb-2">Required Hard Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {job.Required_Hard_Skills.map((skill, i) => (
+                <span key={i} className="bg-cyan-900/40 text-cyan-300 border border-cyan-700/30 px-3 py-1 rounded-full text-sm">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-bold text-cyan-300 mb-3 border-b border-gray-700 pb-2">Required Soft Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {job.Required_Soft_Skills.map((skill, i) => (
+                <span key={i} className="bg-indigo-900/40 text-indigo-300 border border-indigo-700/30 px-3 py-1 rounded-full text-sm">
+                  {skill}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -80,8 +102,22 @@ export const JobOpportunityView: React.FC<JobOpportunityViewProps> = ({ job, onR
             <h3 className="text-lg font-bold text-cyan-300 mb-3 border-b border-gray-700 pb-2">Company Culture</h3>
             <div className="flex flex-wrap gap-2">
               {job.Company_Culture_Keywords.map((keyword, i) => (
-                <span key={i} className="bg-amber-900/30 text-amber-400 border border-amber-700/30 px-3 py-1 rounded-full text-sm">
+                <span key={i} className="bg-emerald-900/30 text-emerald-400 border border-emerald-700/30 px-3 py-1 rounded-full text-sm">
                   {keyword}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {job.Red_Flags.length > 0 && (
+          <div>
+            <h3 className="text-lg font-bold text-red-400 mb-3 border-b border-red-900/50 pb-2">Potential Red Flags</h3>
+            <div className="flex flex-wrap gap-2">
+              {job.Red_Flags.map((flag, i) => (
+                <span key={i} className="bg-red-900/30 text-red-400 border border-red-700/30 px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                  {flag}
                 </span>
               ))}
             </div>

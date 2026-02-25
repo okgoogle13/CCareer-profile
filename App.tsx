@@ -11,6 +11,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { UserProfile } from './components/UserProfile';
 import { JobOpportunityExtractor } from './components/JobOpportunityExtractor';
 import { JobOpportunityView } from './components/JobOpportunityView';
+import { MatchDashboard } from './components/MatchDashboard';
 
 // Helper to convert files to the generative part format
 const filesToGenerativeParts = async (files: File[]) => {
@@ -41,7 +42,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
-  const [activeTab, setActiveTab] = useState<'database' | 'job'>('database');
+  const [activeTab, setActiveTab] = useState<'database' | 'job' | 'match'>('database');
 
   // Auth Listener
   useEffect(() => {
@@ -145,6 +146,17 @@ const App: React.FC = () => {
             >
               2. Extract Job Opportunity
             </button>
+            <button
+              onClick={() => {
+                if (processedData && extractedJob) setActiveTab('match');
+              }}
+              className={`py-4 px-2 font-bold border-b-2 transition-colors ${
+                activeTab === 'match' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-400 hover:text-gray-200'
+              } ${(!processedData || !extractedJob) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!processedData || !extractedJob}
+            >
+              3. Match & Tailor
+            </button>
           </div>
         </div>
       )}
@@ -209,6 +221,12 @@ const App: React.FC = () => {
             ) : (
               <JobOpportunityView job={extractedJob} onReset={() => setExtractedJob(null)} />
             )}
+          </div>
+        )}
+
+        {activeTab === 'match' && processedData && extractedJob && (
+          <div className="px-4">
+            <MatchDashboard careerData={processedData} job={extractedJob} />
           </div>
         )}
       </main>

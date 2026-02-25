@@ -116,12 +116,28 @@ export interface JobOpportunity {
   Work_Type: "Remote" | "Hybrid" | "On-site" | "Unspecified";
   Salary_Range: string;
   Key_Responsibilities: string[];
-  Required_Skills: string[];
+  Required_Hard_Skills: string[];
+  Required_Soft_Skills: string[];
   Preferred_Skills: string[];
   Required_Experience: string;
   Company_Culture_Keywords: string[];
+  Red_Flags: string[];
   Application_Deadline: string;
   Source_URL: string;
+}
+
+export interface SkillMatch {
+  Skill: string;
+  Match_Level: "Strong" | "Partial" | "Missing";
+  Evidence: string;
+}
+
+export interface MatchAnalysis {
+  Overall_Fit_Score: number;
+  Skill_Gaps: SkillMatch[];
+  Tailored_Summary: string;
+  Recommended_Achievement_IDs: string[];
+  Cover_Letter_Draft: string;
 }
 
 export enum AppState {
