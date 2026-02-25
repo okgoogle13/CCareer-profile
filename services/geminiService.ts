@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { CareerDatabase, KSCResponse, CareerEntry, StructuredAchievement } from '../types';
+import { CareerDatabase, KSCResponse, CareerEntry, StructuredAchievement, JobOpportunity } from '../types';
 
 // Initialize the Google GenAI client with the API key from environment variables.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
@@ -335,4 +335,62 @@ export const refineAchievementField = async (ach: StructuredAchievement, field: 
     });
 
     return response.text?.trim() || "";
+};
+
+export const extractJobOpportunity = async (htmlContent: string, sourceUrl: string): Promise<JobOpportunity> => {
+    const prompt = `
+      You are an expert technical recruiter and data analyst.
+      Analyze the following HTML content of a job posting and extract the key particulars into a structured JSON format.
+      
+      Source URL: ${sourceUrl}
+      
+      HTML Content:
+      ${htmlContent.substring(0, 30000)} // Truncate to avoid token limits if too large
+      
+      Extract the following fields:
+      - Job_Title: The official title of the position.
+      - Company_Name: The name of the hiring company.
+      - Location: The location of the job (city, state, country).
+      - Work_Type: One of "Remote", "Hybrid", "On-site", or "Unspecified".
+      - Salary_Range: The stated salary range or compensation details (or "Not specified").
+      - Key_Responsibilities: An array of the main duties and responsibilities.
+      - Required_Skills: An array of mandatory technical and soft skills.
+      - Preferred_Skills: An array of "nice-to-have" or bonus skills.
+      - Required_Experience: The required years of experience or seniority level.
+      - Company_Culture_Keywords: An array of words describing the company culture or values.
+      - Application_Deadline: The closing date for applications (or "Not specified").
+      - Source_URL: The URL provided above.
+    `;
+
+    const schema = {
+        type: Type.OBJECT,
+        properties: {
+            Job_Title: { type: Type.STRING },
+            Company_Name: { type: Type.STRING },
+            Location: { type: Type.STRING },
+            Work_Type: { type: Type.STRING, enum: ["Remote", "Hybrid", "On-site", "Unspecified"] },
+            Salary_Range: { type: Type.STRING },
+            Key_Responsibilities: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Required_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Preferred_Skills: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Required_Experience: { type: Type.STRING },
+            Company_Culture_Keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+            Application_Deadline: { type: Type.STRING },
+            Source_URL: { type: Type.STRING },
+        },
+        required: ["Job_Title", "Company_Name", "Location", "Work_Type", "Salary_Range", "Key_Responsibilities", "Required_Skills", "Preferred_Skills", "Required_Experience", "Company_Culture_Keywords", "Application_Deadline", "Source_URL"]
+    };
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: { parts: [{ text: prompt }] },
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: schema,
+        }
+    });
+
+    const jsonString = response.text;
+    if (!jsonString) throw new Error("Empty response from Gemini");
+    return JSON.parse(jsonString) as JobOpportunity;
 };

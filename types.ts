@@ -109,9 +109,25 @@ export interface CareerDatabase {
   KSC_Responses: KSCResponse[];
 }
 
+export interface JobOpportunity {
+  Job_Title: string;
+  Company_Name: string;
+  Location: string;
+  Work_Type: "Remote" | "Hybrid" | "On-site" | "Unspecified";
+  Salary_Range: string;
+  Key_Responsibilities: string[];
+  Required_Skills: string[];
+  Preferred_Skills: string[];
+  Required_Experience: string;
+  Company_Culture_Keywords: string[];
+  Application_Deadline: string;
+  Source_URL: string;
+}
+
 export enum AppState {
   IDLE,
   PROCESSING,
   VALIDATING,
+  JOB_EXTRACTION,
   ERROR,
 }

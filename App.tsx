@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { AppState, CareerDatabase } from './types';
+import { AppState, CareerDatabase, JobOpportunity } from './types';
 import { Header } from './components/Header';
 import { DocumentInput } from './components/DocumentInput';
 import { processCareerDocuments } from './services/geminiService';
@@ -9,6 +9,8 @@ import { ExclamationTriangleIcon } from './components/icons/ExclamationTriangleI
 import { auth, signIn, logout, getUserCareerData } from './services/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { UserProfile } from './components/UserProfile';
+import { JobOpportunityExtractor } from './components/JobOpportunityExtractor';
+import { JobOpportunityView } from './components/JobOpportunityView';
 
 // Helper to convert files to the generative part format
 const filesToGenerativeParts = async (files: File[]) => {
@@ -35,9 +37,11 @@ const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
   const [processedData, setProcessedData] = useState<CareerDatabase | null>(null);
+  const [extractedJob, setExtractedJob] = useState<JobOpportunity | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState<'database' | 'job'>('database');
 
   // Auth Listener
   useEffect(() => {
@@ -93,6 +97,8 @@ const App: React.FC = () => {
     setError(null);
     setProcessedData(null);
     setShowProfile(false);
+    setExtractedJob(null);
+    setActiveTab('database');
   };
 
   if (isAuthLoading) {
@@ -120,53 +126,90 @@ const App: React.FC = () => {
         />
       )}
 
-      <main className="pb-20">
-        {!processedData && appState === AppState.IDLE && (
-          <div className="max-w-4xl mx-auto pt-12 text-center px-4 animate-fade-in">
-              <h2 className="text-4xl font-extrabold text-white mb-4">Build Your Master Career Database</h2>
-              <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
-                Upload your resumes, project docs, and criteria responses. We'll merge them into a high-fidelity JSON structure synced to your profile.
-              </p>
-              <DocumentInput onProcess={handleProcess} isLoading={false} />
+      {processedData && (
+        <div className="bg-gray-800 border-b border-gray-700 px-4">
+          <div className="max-w-6xl mx-auto flex gap-6">
+            <button
+              onClick={() => setActiveTab('database')}
+              className={`py-4 px-2 font-bold border-b-2 transition-colors ${
+                activeTab === 'database' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              1. Career Database
+            </button>
+            <button
+              onClick={() => setActiveTab('job')}
+              className={`py-4 px-2 font-bold border-b-2 transition-colors ${
+                activeTab === 'job' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              2. Extract Job Opportunity
+            </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {appState === AppState.PROCESSING && (
-          <div className="flex flex-col items-center justify-center p-8 text-center pt-24">
-            <svg className="animate-spin h-12 w-12 text-cyan-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <h2 className="text-2xl font-semibold text-white">Analyzing Your Career...</h2>
-            <p className="text-gray-400 mt-2 max-w-2xl">
-              The AI is now using advanced reasoning to de-duplicate, merge, and structure your career history.
-            </p>
-          </div>
-        )}
+      <main className="pb-20 pt-8">
+        {activeTab === 'database' && (
+          <>
+            {!processedData && appState === AppState.IDLE && (
+              <div className="max-w-4xl mx-auto pt-12 text-center px-4 animate-fade-in">
+                  <h2 className="text-4xl font-extrabold text-white mb-4">Build Your Master Career Database</h2>
+                  <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                    Upload your resumes, project docs, and criteria responses. We'll merge them into a high-fidelity JSON structure synced to your profile.
+                  </p>
+                  <DocumentInput onProcess={handleProcess} isLoading={false} />
+              </div>
+            )}
 
-        {appState === AppState.ERROR && (
-          <div className="my-8 mx-auto max-w-3xl p-4">
-              <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg relative" role="alert">
-                  <strong className="font-bold flex items-center gap-2"><ExclamationTriangleIcon className="w-5 h-5"/>Processing Error</strong>
-                  <span className="block sm:inline mt-2 sm:mt-0">{error}</span>
-                  <div className="mt-4">
-                    <button
-                        onClick={resetState}
-                        className="px-4 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-500"
-                    >
-                        Start Over
-                    </button>
+            {appState === AppState.PROCESSING && (
+              <div className="flex flex-col items-center justify-center p-8 text-center pt-24">
+                <svg className="animate-spin h-12 w-12 text-cyan-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <h2 className="text-2xl font-semibold text-white">Analyzing Your Career...</h2>
+                <p className="text-gray-400 mt-2 max-w-2xl">
+                  The AI is now using advanced reasoning to de-duplicate, merge, and structure your career history.
+                </p>
+              </div>
+            )}
+
+            {appState === AppState.ERROR && (
+              <div className="my-8 mx-auto max-w-3xl p-4">
+                  <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg relative" role="alert">
+                      <strong className="font-bold flex items-center gap-2"><ExclamationTriangleIcon className="w-5 h-5"/>Processing Error</strong>
+                      <span className="block sm:inline mt-2 sm:mt-0">{error}</span>
+                      <div className="mt-4">
+                        <button
+                            onClick={resetState}
+                            className="px-4 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-500"
+                        >
+                            Start Over
+                        </button>
+                      </div>
                   </div>
               </div>
-          </div>
+            )}
+
+            {processedData && (
+              <ValidationDashboard 
+                data={processedData} 
+                onUpdate={handleUpdateData} 
+                userId={user?.uid}
+              />
+            )}
+          </>
         )}
 
-        {processedData && (
-          <ValidationDashboard 
-            data={processedData} 
-            onUpdate={handleUpdateData} 
-            userId={user?.uid}
-          />
+        {activeTab === 'job' && (
+          <div className="px-4">
+            {!extractedJob ? (
+              <JobOpportunityExtractor onExtracted={setExtractedJob} />
+            ) : (
+              <JobOpportunityView job={extractedJob} onReset={() => setExtractedJob(null)} />
+            )}
+          </div>
         )}
       </main>
       
