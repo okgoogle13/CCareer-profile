@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { CareerDatabase, KSCResponse, CareerEntry, StructuredAchievement, JobOpportunity, MatchAnalysis } from '../types';
 
 // Initialize the Google GenAI client with the API key from environment variables.
@@ -472,9 +472,11 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
 
 export const generateMatchAnalysis = async (careerData: CareerDatabase, job: JobOpportunity): Promise<MatchAnalysis> => {
     const prompt = `
-      You are an expert executive recruiter and career coach.
-      Analyze the candidate's Career Database against the target Job Opportunity.
+      You are an elite executive career coach and expert resume writer who specializes in authentic, high-impact job applications.
+      Your task is to analyze the candidate's Career Database against the target Job Opportunity and provide a highly tailored, authentic match analysis.
       
+      CRITICAL INSTRUCTION: Use the Google Search tool to research the company "${job.Company_Name}". Look for recent news, their mission, core values, or current industry challenges they might be facing. Use this context to make the cover letter and summary deeply authentic and specific to them.
+
       Job Opportunity:
       ${JSON.stringify(job)}
       
@@ -484,9 +486,15 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
       Perform the following:
       1. Calculate an Overall_Fit_Score (0-100) based on skill overlap and experience.
       2. Perform a Skill Gap Analysis. For each Required_Skill and Preferred_Skill in the job, determine if the candidate has a "Strong", "Partial", or "Missing" match. Provide brief evidence if Strong/Partial.
-      3. Write a highly tailored Professional Summary (3-4 sentences) for the top of a resume targeting this specific role.
-      4. Select the top 5-7 most relevant Achievement_IDs from the candidate's Structured_Achievements that should be highlighted in the resume.
+      3. Write a highly tailored Professional Summary (3-4 sentences) for the top of a resume targeting this specific role. 
+         - VALUE PROPOSITION: The Tailored Summary should be a strong 2-3 sentence hook that aligns the user's top 2 strengths directly with the core problem the job is trying to solve.
+      4. Select the top 5-7 most relevant Achievement_IDs from the candidate's Structured_Achievements that should be highlighted in the resume. Choose achievements that demonstrate impact related to the job's core responsibilities.
       5. Draft a compelling, modern Cover Letter tailored to this company and role, drawing specific metrics and examples from the candidate's achievements.
+      
+      Guidelines for Authentic Tailoring:
+      - NO AI CLICHÉS: Do not use words like "thrilled", "delve", "testament", "tapestry", "navigate", or "fast-paced". Write like a real, confident professional.
+      - SHOW, DON'T TELL: Instead of saying "I have great leadership skills", use the candidate's achievements to demonstrate leadership.
+      - COMPANY CONTEXT: Incorporate 1-2 subtle references to the company's actual current context (based on your search) in the cover letter to show genuine interest.
     `;
 
     const schema = {
@@ -513,12 +521,13 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
     };
 
     const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-3.1-pro-preview',
         contents: { parts: [{ text: prompt }] },
         config: {
             responseMimeType: "application/json",
             responseSchema: schema,
-            temperature: 0.2,
+            thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+            tools: [{ googleSearch: {} }]
         }
     });
 

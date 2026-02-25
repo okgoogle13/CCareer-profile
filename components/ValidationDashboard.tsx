@@ -206,6 +206,7 @@ interface KSCItemProps {
 
 const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onUpdate, isSelected, onToggleSelect }) => {
     const [isRefining, setIsRefining] = useState(false);
+    const [achievementSearchTerm, setAchievementSearchTerm] = useState('');
 
     const handleUpdate = (field: keyof KSCResponse, value: any) => {
         onUpdate({ ...ksc, [field]: value });
@@ -251,7 +252,16 @@ const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onU
       if (Result && Result !== ksc.Result) updates.Result = Result;
       
       if (Object.keys(updates).length > 0) {
-        onUpdate({ ...ksc, ...updates });
+        onUpdate({ 
+            ...ksc, 
+            ...updates,
+            Improvement_Suggestions: {
+                Situation: undefined,
+                Task: undefined,
+                Action: undefined,
+                Result: undefined
+            }
+        });
       }
     };
 
@@ -317,24 +327,39 @@ const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onU
             {ksc.Linked_Entry_ID && filteredAchievementsForLink.length > 0 && (
               <div className="mb-4 p-3 bg-gray-900/40 rounded border border-cyan-900/30">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Link Specific Achievements</label>
-                <div className="flex flex-wrap gap-2">
-                  {filteredAchievementsForLink.map(ach => {
-                    const isLinked = (ksc.Linked_Achievement_IDs || []).includes(ach.Achievement_ID);
-                    return (
-                      <button
-                        key={ach.Achievement_ID}
-                        onClick={() => toggleLinkedAchievement(ach.Achievement_ID)}
-                        className={`text-[10px] px-2 py-1 rounded transition-all flex items-center gap-2 border ${
-                          isLinked 
-                          ? 'bg-cyan-900/40 border-cyan-500 text-cyan-300' 
-                          : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-cyan-500/50 hover:text-cyan-400'
-                        }`}
-                      >
-                        <div className={`w-2 h-2 rounded-full ${isLinked ? 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]' : 'bg-gray-600'}`} />
-                        <span className="max-w-[120px] truncate">{ach.Action_Verb} {ach.Noun_Task}</span>
-                      </button>
-                    );
-                  })}
+                
+                <div className="mb-2">
+                  <input
+                    type="text"
+                    placeholder="Search achievements to link..."
+                    value={achievementSearchTerm}
+                    onChange={(e) => setAchievementSearchTerm(e.target.value)}
+                    className="w-full text-xs bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-gray-300 focus:ring-1 focus:ring-cyan-500 focus:outline-none mb-2 placeholder-gray-600"
+                  />
+                  <div className="max-h-32 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
+                    {filteredAchievementsForLink
+                      .filter(ach => {
+                        const searchStr = `${ach.Action_Verb} ${ach.Noun_Task} ${ach.Strategy} ${ach.Outcome}`.toLowerCase();
+                        return searchStr.includes(achievementSearchTerm.toLowerCase());
+                      })
+                      .map(ach => {
+                        const isLinked = (ksc.Linked_Achievement_IDs || []).includes(ach.Achievement_ID);
+                        return (
+                          <button
+                            key={ach.Achievement_ID}
+                            onClick={() => toggleLinkedAchievement(ach.Achievement_ID)}
+                            className={`text-left text-[10px] px-2 py-1.5 rounded transition-all flex items-start gap-2 border ${
+                              isLinked 
+                              ? 'bg-cyan-900/40 border-cyan-500 text-cyan-300' 
+                              : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-cyan-500/50 hover:text-cyan-300'
+                            }`}
+                          >
+                            <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${isLinked ? 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]' : 'bg-gray-600'}`} />
+                            <span className="line-clamp-2">{ach.Action_Verb} {ach.Noun_Task} {ach.Strategy} resulting in {ach.Outcome}</span>
+                          </button>
+                        );
+                      })}
+                  </div>
                 </div>
               </div>
             )}
@@ -471,7 +496,17 @@ const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, onUpdate
     });
 
     if (Object.keys(updates).length > 0) {
-        onUpdate({ ...achievement, ...updates });
+        onUpdate({ 
+            ...achievement, 
+            ...updates,
+            Improvement_Suggestions: {
+                Action_Verb: undefined,
+                Noun_Task: undefined,
+                Metric: undefined,
+                Strategy: undefined,
+                Outcome: undefined
+            }
+        });
     }
   };
 
