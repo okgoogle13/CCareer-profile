@@ -1,0 +1,5 @@
+{
+  "name": "Career Database Pre-processor",
+  "description": "An AI-powered tool to ingest raw career documents, analyze them, and transform them into a highly-structured, machine-readable database for consumption by other career applications.",
+  "requestFramePermissions": []
+}
