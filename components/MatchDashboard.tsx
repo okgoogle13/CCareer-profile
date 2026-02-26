@@ -124,22 +124,46 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
           {/* Skill Gaps */}
           <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
             <h3 className="text-xl font-bold text-cyan-300 mb-4 border-b border-gray-700 pb-2">Skill Gap Analysis</h3>
-            <div className="space-y-4">
-              {analysis.Skill_Gaps.map((gap, i) => (
-                <div key={i} className="bg-gray-900/50 p-3 rounded border border-gray-700/50">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="font-semibold text-gray-200">{gap.Skill}</span>
-                    <span className={`text-xs px-2 py-1 rounded font-bold uppercase tracking-wider ${
-                      gap.Match_Level === 'Strong' ? 'bg-green-900/30 text-green-400 border border-green-800/50' :
-                      gap.Match_Level === 'Partial' ? 'bg-amber-900/30 text-amber-400 border border-amber-800/50' :
-                      'bg-red-900/30 text-red-400 border border-red-800/50'
-                    }`}>
-                      {gap.Match_Level}
-                    </span>
+            <div className="space-y-3">
+              {analysis.Skill_Gaps.map((gap, i) => {
+                const levelStyles = {
+                  Strong: {
+                    bg: 'bg-green-900/40',
+                    border: 'border-green-500/30',
+                    text: 'text-green-300',
+                    dot: 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]',
+                  },
+                  Partial: {
+                    bg: 'bg-amber-900/40',
+                    border: 'border-amber-500/30',
+                    text: 'text-amber-300',
+                    dot: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]',
+                  },
+                  Missing: {
+                    bg: 'bg-red-900/40',
+                    border: 'border-red-500/30',
+                    text: 'text-red-300',
+                    dot: 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)]',
+                  },
+                }[gap.Match_Level];
+
+                return (
+                  <div key={i} className={`p-4 rounded-lg border ${levelStyles.bg} ${levelStyles.border}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2.5 h-2.5 rounded-full ${levelStyles.dot}`} />
+                        <span className={`font-bold ${levelStyles.text}`}>{gap.Skill}</span>
+                      </div>
+                      <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${levelStyles.bg} ${levelStyles.border}`}>
+                        {gap.Match_Level}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-400 pl-5 border-l-2 border-gray-700 ml-1.5 py-1">
+                      {gap.Evidence || 'No direct evidence found in the provided documents.'}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-400">{gap.Evidence}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 

@@ -103,10 +103,11 @@ const EditableField: React.FC<EditableFieldProps> = ({
             {!hasSuggestion && onRequestSuggestion && !isLoadingSuggestion && (
                 <button 
                     onClick={triggerRequestSuggestion}
-                    className="opacity-0 group-hover:opacity-100 text-[10px] bg-gray-800/80 text-gray-400 hover:text-amber-400 border border-gray-700 px-1.5 py-0.5 rounded transition-all"
+                    className="text-[10px] bg-gray-800/80 text-cyan-500 hover:text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded transition-all flex items-center gap-1"
                     title="Get AI Suggestion"
                 >
                     <LightBulbIcon className="w-3 h-3" />
+                    <span>AI Suggest</span>
                 </button>
             )}
             {hasSuggestion && (
