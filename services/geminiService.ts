@@ -391,6 +391,7 @@ export const analyzeFitAndGenerateDrafts = async (
             responseMimeType: "application/json",
             responseSchema: schema,
             temperature: 0.2,
+            tools: [{ googleSearch: {} }]
         }
     });
 
@@ -399,15 +400,12 @@ export const analyzeFitAndGenerateDrafts = async (
     return JSON.parse(jsonString) as MatchAnalysis;
 };
 
-export const extractJobOpportunity = async (htmlContent: string, sourceUrl: string, careerData?: CareerDatabase): Promise<JobOpportunity> => {
+export const extractJobOpportunity = async (inputType: 'url' | 'text', content: string, careerData?: CareerDatabase): Promise<JobOpportunity> => {
     const prompt = `
       You are an expert technical recruiter and data analyst.
-      Analyze the following HTML content of a job posting and extract the key particulars into a structured JSON format.
+      Analyze the following job posting and extract the key particulars into a structured JSON format.
       
-      Source URL: ${sourceUrl}
-      
-      HTML Content:
-      ${htmlContent.substring(0, 30000)} // Truncate to avoid token limits if too large
+      ${inputType === 'url' ? `Source URL: ${content}\nPlease extract the job details from this URL.` : `Job Posting Text:\n${content.substring(0, 30000)}`}
       
       ${careerData ? `
       Additionally, you have access to the user's Career Database:
@@ -420,7 +418,7 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
       - Job_Title: The official title of the position.
       - Company_Name: The name of the hiring company.
       - Location: The location of the job (city, state, country).
-      - Work_Type: One of "Remote", "Hybrid", "On-site", or "Unspecified".
+      - Work_Type: One of "Remote", "Hybrid", "On-site", "Unspecified".
       - Salary_Range: The stated salary range or compensation details (or "Not specified").
       - Key_Responsibilities: An array of the main duties and responsibilities.
       - Required_Hard_Skills: An array of mandatory technical/hard skills.
@@ -431,7 +429,7 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
       - Company_Culture_Keywords: An array of words describing the company culture or values.
       - Red_Flags: An array of potential red flags (e.g., "fast-paced environment", "wear many hats", "unlimited PTO").
       - Application_Deadline: The closing date for applications (or "Not specified").
-      - Source_URL: The URL provided above.
+      - Source_URL: ${inputType === 'url' ? content : '"Pasted Text"'}
     `;
 
     const schema = {
@@ -462,6 +460,7 @@ export const extractJobOpportunity = async (htmlContent: string, sourceUrl: stri
         config: {
             responseMimeType: "application/json",
             responseSchema: schema,
+            tools: inputType === 'url' ? [{ urlContext: {} }] : undefined
         }
     });
 
@@ -490,6 +489,7 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
          - VALUE PROPOSITION: The Tailored Summary should be a strong 2-3 sentence hook that aligns the user's top 2 strengths directly with the core problem the job is trying to solve.
       4. Select the top 5-7 most relevant Achievement_IDs from the candidate's Structured_Achievements that should be highlighted in the resume. Choose achievements that demonstrate impact related to the job's core responsibilities.
       5. Draft a compelling, modern Cover Letter tailored to this company and role, drawing specific metrics and examples from the candidate's achievements.
+      6. Draft 2-3 Key Selection Criteria (KSC) Responses in STAR format (Situation, Task, Action, Result) based on the most critical requirements of the job. Each response should be 150-200 words.
       
       Guidelines for Authentic Tailoring:
       - NO AI CLICHÉS: Do not use words like "thrilled", "delve", "testament", "tapestry", "navigate", or "fast-paced". Write like a real, confident professional.
@@ -515,9 +515,20 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
             },
             Tailored_Summary: { type: Type.STRING },
             Recommended_Achievement_IDs: { type: Type.ARRAY, items: { type: Type.STRING } },
-            Cover_Letter_Draft: { type: Type.STRING }
+            Cover_Letter_Draft: { type: Type.STRING },
+            KSC_Responses_Drafts: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        KSC_Prompt: { type: Type.STRING },
+                        Response: { type: Type.STRING }
+                    },
+                    required: ["KSC_Prompt", "Response"]
+                }
+            }
         },
-        required: ["Overall_Fit_Score", "Skill_Gaps", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft"]
+        required: ["Overall_Fit_Score", "Skill_Gaps", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft", "KSC_Responses_Drafts"]
     };
 
     const response = await ai.models.generateContent({

@@ -23,28 +23,13 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
 
     try {
       let contentToProcess = '';
-      let sourceUrl = '';
-
       if (inputType === 'url') {
-        const response = await fetch('/api/fetch-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch URL content');
-        }
-
-        const { html } = await response.json();
-        contentToProcess = html;
-        sourceUrl = url;
+        contentToProcess = url;
       } else {
         contentToProcess = text;
-        sourceUrl = 'Pasted Text';
       }
 
-      const job = await extractJobOpportunity(contentToProcess, sourceUrl, careerData || undefined);
+      const job = await extractJobOpportunity(inputType, contentToProcess, careerData || undefined);
       onExtracted(job);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
