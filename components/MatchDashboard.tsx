@@ -3,8 +3,14 @@ import { CareerDatabase, JobOpportunity, MatchAnalysis } from '../types';
 import { generateMatchAnalysis } from '../services/geminiService';
 import { TailoredResumeView } from './TailoredResumeView';
 import { KSCResponsesView } from './KSCResponsesView';
+import { AuditDisplay } from './AuditDisplay';
+import { ATSScoreCard } from './ATSScoreCard';
+import { CoverLetterSpecificMetrics } from './CoverLetterSpecificMetrics';
+import { SuggestionsPanel } from './SuggestionsPanel';
+import { useATSScoring } from '../hooks/useATSScoring';
 import { RESUME_TEMPLATES, TemplateStyle } from '../constants';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { CoverLetterScoreResult } from '../types';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, ColumnBreak } from 'docx';
 import html2pdf from 'html2pdf.js';
 import { saveAs } from 'file-saver';
 
@@ -19,8 +25,37 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'analysis' | 'resume' | 'coverLetter' | 'ksc'>('analysis');
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateStyle>(RESUME_TEMPLATES[0]);
+  const [showAudit, setShowAudit] = useState(false);
+  const [coverLetterContent, setCoverLetterContent] = useState('');
   const resumeRef = useRef<HTMLDivElement>(null);
   const kscRef = useRef<HTMLDivElement>(null);
+
+  // Helper to get resume text for scoring
+  const getResumeText = () => {
+    if (!analysis) return '';
+    let text = `${careerData.Personal_Information.FullName}\n${analysis.Tailored_Summary}\n`;
+    
+    const workEntries = careerData.Career_Entries.filter(e => e.Entry_Type === "Work Experience")
+      .sort((a, b) => new Date(b.StartDate).getTime() - new Date(a.StartDate).getTime());
+
+    workEntries.forEach(entry => {
+      const entryAchievements = careerData.Structured_Achievements.filter(a => a.Entry_ID === entry.Entry_ID);
+      if (entryAchievements.length > 0) {
+        text += `${entry.Role} at ${entry.Organization}\n`;
+        entryAchievements.forEach(ach => {
+          text += `- ${ach.Action_Verb} ${ach.Noun_Task} ${ach.Strategy} resulting in ${ach.Outcome}.\n`;
+        });
+      }
+    });
+    
+    text += `Skills: ${careerData.Master_Skills_Inventory.map(s => s.Skill_Name).join(', ')}`;
+    return text;
+  };
+
+  const jobDescriptionText = `${job.Job_Title} at ${job.Company_Name}\n${job.Key_Responsibilities.join('\n')}\n${job.Required_Hard_Skills.join('\n')}\n${job.Required_Soft_Skills.join('\n')}`;
+
+  const resumeScoring = useATSScoring(getResumeText(), jobDescriptionText, 'resume');
+  const coverLetterScoring = useATSScoring(coverLetterContent, jobDescriptionText, 'coverLetter');
 
   const handleAnalyze = async () => {
     setIsLoading(true);
@@ -28,6 +63,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
     try {
       const result = await generateMatchAnalysis(careerData, job);
       setAnalysis(result);
+      setCoverLetterContent(result.Cover_Letter_Draft);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -106,53 +142,94 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
 
   const exportToDOCX = async () => {
     if (activeTab === 'resume' && analysis) {
+      const isTwoColumn = selectedTemplate.layout === 'two-column';
+      
+      const leftColumnContent = [
+        new Paragraph({
+          text: careerData.Personal_Information.FullName,
+          heading: HeadingLevel.HEADING_1,
+        }),
+        new Paragraph({
+          children: [
+            new TextRun(`${careerData.Personal_Information.Email} | ${careerData.Personal_Information.Phone} | ${careerData.Personal_Information.Location}`),
+          ],
+        }),
+        new Paragraph({ text: "" }),
+        new Paragraph({
+          text: "Professional Summary",
+          heading: HeadingLevel.HEADING_2,
+        }),
+        new Paragraph({
+          text: analysis.Tailored_Summary,
+        }),
+        new Paragraph({ text: "" }),
+        new Paragraph({
+          text: "Professional Experience",
+          heading: HeadingLevel.HEADING_2,
+        }),
+        ...careerData.Career_Entries.filter(e => e.Entry_Type === "Work Experience")
+          .sort((a, b) => new Date(b.StartDate).getTime() - new Date(a.StartDate).getTime())
+          .flatMap(entry => {
+            const entryAchievements = careerData.Structured_Achievements.filter(a => a.Entry_ID === entry.Entry_ID);
+            if (entryAchievements.length === 0) return [];
+            return [
+              new Paragraph({
+                text: entry.Role,
+                heading: HeadingLevel.HEADING_3,
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({ text: entry.Organization, bold: true }),
+                  new TextRun(` | ${entry.StartDate} - ${entry.EndDate}`),
+                ],
+              }),
+              ...entryAchievements.map(ach => new Paragraph({
+                text: `${ach.Action_Verb} ${ach.Noun_Task} ${ach.Strategy} resulting in ${ach.Outcome}.`,
+                bullet: { level: 0 }
+              })),
+              new Paragraph({ text: "" })
+            ];
+          })
+      ];
+
+      const rightColumnContent = [
+        new Paragraph({
+          text: "Skills",
+          heading: HeadingLevel.HEADING_2,
+        }),
+        ...careerData.Master_Skills_Inventory
+          .filter(s => s.Proficiency === 'Expert' || s.Proficiency === 'Master' || s.Proficiency === 'Proficient')
+          .slice(0, 15)
+          .map(skill => new Paragraph({
+            text: skill.Skill_Name,
+            bullet: { level: 0 }
+          })),
+        new Paragraph({ text: "" }),
+        new Paragraph({
+          text: "Education",
+          heading: HeadingLevel.HEADING_2,
+        }),
+        ...careerData.Career_Entries.filter(e => e.Entry_Type === "Education")
+          .map(entry => new Paragraph({
+            children: [
+              new TextRun({ text: entry.Role, bold: true }),
+              new TextRun(`\n${entry.Organization}`),
+              new TextRun(`\n${entry.EndDate}`),
+            ]
+          }))
+      ];
+
       const doc = new Document({
         sections: [{
-          properties: {},
-          children: [
-            new Paragraph({
-              text: careerData.Personal_Information.FullName,
-              heading: HeadingLevel.HEADING_1,
-            }),
-            new Paragraph({
-              children: [
-                new TextRun(`${careerData.Personal_Information.Email} | ${careerData.Personal_Information.Phone} | ${careerData.Personal_Information.Location}`),
-              ],
-            }),
-            new Paragraph({
-              text: "Professional Summary",
-              heading: HeadingLevel.HEADING_2,
-            }),
-            new Paragraph({
-              text: analysis.Tailored_Summary,
-            }),
-            new Paragraph({
-              text: "Professional Experience",
-              heading: HeadingLevel.HEADING_2,
-            }),
-            ...careerData.Career_Entries.filter(e => e.Entry_Type === "Work Experience")
-              .sort((a, b) => new Date(b.StartDate).getTime() - new Date(a.StartDate).getTime())
-              .flatMap(entry => {
-                const entryAchievements = careerData.Structured_Achievements.filter(a => a.Entry_ID === entry.Entry_ID);
-                if (entryAchievements.length === 0) return [];
-                return [
-                  new Paragraph({
-                    text: entry.Role,
-                    heading: HeadingLevel.HEADING_3,
-                  }),
-                  new Paragraph({
-                    children: [
-                      new TextRun({ text: entry.Organization, bold: true }),
-                      new TextRun(` | ${entry.StartDate} - ${entry.EndDate}`),
-                    ],
-                  }),
-                  ...entryAchievements.map(ach => new Paragraph({
-                    text: `${ach.Action_Verb} ${ach.Noun_Task} ${ach.Strategy} resulting in ${ach.Outcome}.`,
-                    bullet: { level: 0 }
-                  }))
-                ];
-              })
-          ],
+          properties: isTwoColumn ? {
+            column: {
+              count: 2,
+              space: 720, // 0.5 inch
+            }
+          } : {},
+          children: isTwoColumn 
+            ? [...leftColumnContent, new Paragraph({ children: [new ColumnBreak()] }), ...rightColumnContent] 
+            : [...leftColumnContent, ...rightColumnContent],
         }],
       });
       const blob = await Packer.toBlob(doc);
@@ -325,6 +402,19 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
         
         {(activeTab === 'resume' || activeTab === 'coverLetter' || activeTab === 'ksc') && (
           <div className="flex gap-2 mb-1">
+            {(activeTab === 'resume' || activeTab === 'coverLetter') && (
+              <button 
+                onClick={() => setShowAudit(!showAudit)}
+                className={`flex items-center gap-2 px-3 py-1 rounded text-sm font-bold transition-colors mr-4 ${
+                  showAudit ? 'bg-cyan-600 text-white' : 'bg-gray-700 text-cyan-400 hover:bg-gray-600'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {showAudit ? 'Hide Audit' : 'Show Audit'}
+              </button>
+            )}
             <span className="text-gray-400 text-sm mr-2 self-center">Export as:</span>
             <button onClick={exportToPDF} className="bg-red-900/40 hover:bg-red-800/60 text-red-300 border border-red-500/30 px-3 py-1 rounded text-sm font-bold transition-colors">
               PDF
@@ -413,18 +503,51 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
       )}
 
       {activeTab === 'resume' && (
-        <div ref={resumeRef}>
-          <TailoredResumeView careerData={careerData} analysis={analysis} template={selectedTemplate} />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+          <div className="xl:col-span-2" ref={resumeRef}>
+            <TailoredResumeView careerData={careerData} analysis={analysis} template={selectedTemplate} />
+          </div>
+          <div className="xl:col-span-1 space-y-6 sticky top-8">
+            <ATSScoreCard 
+              score={resumeScoring.score} 
+              isCalculating={resumeScoring.isCalculating} 
+              documentType="resume" 
+            />
+            {showAudit && analysis.Resume_Audit && (
+              <AuditDisplay audit={analysis.Resume_Audit} title="Resume" />
+            )}
+            <SuggestionsPanel score={resumeScoring.score} documentType="resume" />
+          </div>
         </div>
       )}
 
       {activeTab === 'coverLetter' && (
-        <div className="bg-white p-10 shadow-lg max-w-4xl mx-auto" style={{ fontFamily: selectedTemplate.fontSans, color: selectedTemplate.textColor }}>
-          <h1 className="text-3xl font-bold uppercase mb-8 border-b-2 pb-4" style={{ color: selectedTemplate.primaryColor, borderColor: selectedTemplate.primaryColor }}>Cover Letter</h1>
-          <textarea 
-            className="w-full h-[600px] bg-transparent text-gray-800 p-0 border-none focus:outline-none leading-relaxed resize-none"
-            defaultValue={analysis.Cover_Letter_Draft}
-          />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+          <div className="xl:col-span-2 bg-white p-10 shadow-lg" style={{ fontFamily: selectedTemplate.fontSans, color: selectedTemplate.textColor }}>
+            <h1 className="text-3xl font-bold uppercase mb-8 border-b-2 pb-4" style={{ color: selectedTemplate.primaryColor, borderColor: selectedTemplate.primaryColor }}>Cover Letter</h1>
+            <textarea 
+              className="w-full h-[600px] bg-transparent text-gray-800 p-0 border-none focus:outline-none leading-relaxed resize-none"
+              value={coverLetterContent}
+              onChange={(e) => setCoverLetterContent(e.target.value)}
+            />
+          </div>
+          <div className="xl:col-span-1 space-y-6 sticky top-8">
+            <ATSScoreCard 
+              score={coverLetterScoring.score} 
+              isCalculating={coverLetterScoring.isCalculating} 
+              documentType="coverLetter" 
+            />
+            {coverLetterScoring.score && (
+              <CoverLetterSpecificMetrics 
+                score={coverLetterScoring.score as CoverLetterScoreResult} 
+                wordCount={coverLetterContent.split(/\s+/).length} 
+              />
+            )}
+            {showAudit && analysis.Cover_Letter_Audit && (
+              <AuditDisplay audit={analysis.Cover_Letter_Audit} title="Cover Letter" />
+            )}
+            <SuggestionsPanel score={coverLetterScoring.score} documentType="coverLetter" />
+          </div>
         </div>
       )}
 

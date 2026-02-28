@@ -490,11 +490,30 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
       4. Select the top 5-7 most relevant Achievement_IDs from the candidate's Structured_Achievements that should be highlighted in the resume. Choose achievements that demonstrate impact related to the job's core responsibilities.
       5. Draft a compelling, modern Cover Letter tailored to this company and role, drawing specific metrics and examples from the candidate's achievements.
       6. Draft 2-3 Key Selection Criteria (KSC) Responses in STAR format (Situation, Task, Action, Result) based on the most critical requirements of the job. Each response should be 150-200 words.
-      
+      7. Perform a "Best Practices" Audit for both the Resume and the Cover Letter based on the Resume Knowledge Library (RKL) rules below.
+
+      RESUME KNOWLEDGE LIBRARY (RKL) RULES:
+      - [L1.L1.001] Single-column layout preferred (universally safer).
+      - [L1.L1.002] Top-third priority: Name, contact, target role, summary, recent experience must be in top 30%.
+      - [L1.L1.005] Two-column layout constraints (if used):
+        - Layout: Two-column using native document columns (60/40 or 65/35 ratio).
+        - Left Column Content: Contact, Work Experience, Job Titles, Dates.
+        - Right Column Content: Skills, Certifications, Additional Info.
+        - Linear reading order: Ensure content flows logically from left to right, top to bottom.
+      - [L2.V1.001] Body text 10-12pt, headings 14-16pt.
+      - [L2.V1.002] Standard fonts only: Arial, Calibri, Georgia, Times New Roman, Garamond.
+      - [L2.V1.004] No charts/infographics/images/logos/skill bars.
+      - [L4.A1.002] Linear reading order: No tables, text boxes, or floating elements for layout structure.
+      - [L5.S1.001] Extract and embed 10-15 keywords from JD.
+      - [L7.W1.001] Specific + outcome-focused bullets (Action + Context + Outcome).
+      - [L7.W1.002] Strong action verbs over passive voice.
+      - [L7.W1.005] Simple bullet points only (- or •), no custom icons.
+
       Guidelines for Authentic Tailoring:
       - NO AI CLICHÉS: Do not use words like "thrilled", "delve", "testament", "tapestry", "navigate", or "fast-paced". Write like a real, confident professional.
       - SHOW, DON'T TELL: Instead of saying "I have great leadership skills", use the candidate's achievements to demonstrate leadership.
       - COMPANY CONTEXT: Incorporate 1-2 subtle references to the company's actual current context (based on your search) in the cover letter to show genuine interest.
+      - TWO-COLUMN RISK: If a two-column layout is detected or recommended, include a warning that single-column is universally safer, while two-column offers better space efficiency for experienced professionals when properly tested.
     `;
 
     const schema = {
@@ -526,9 +545,53 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
                     },
                     required: ["KSC_Prompt", "Response"]
                 }
+            },
+            Resume_Audit: {
+                type: Type.OBJECT,
+                properties: {
+                    overallScore: { type: Type.NUMBER },
+                    scanSimulation: { type: Type.STRING },
+                    violations: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                ruleId: { type: Type.STRING },
+                                severity: { type: Type.STRING, enum: ["error", "warning", "info"] },
+                                message: { type: Type.STRING },
+                                location: { type: Type.STRING }
+                            },
+                            required: ["ruleId", "severity", "message"]
+                        }
+                    },
+                    recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
+                },
+                required: ["overallScore", "scanSimulation", "violations", "recommendations"]
+            },
+            Cover_Letter_Audit: {
+                type: Type.OBJECT,
+                properties: {
+                    overallScore: { type: Type.NUMBER },
+                    scanSimulation: { type: Type.STRING },
+                    violations: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                ruleId: { type: Type.STRING },
+                                severity: { type: Type.STRING, enum: ["error", "warning", "info"] },
+                                message: { type: Type.STRING },
+                                location: { type: Type.STRING }
+                            },
+                            required: ["ruleId", "severity", "message"]
+                        }
+                    },
+                    recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
+                },
+                required: ["overallScore", "scanSimulation", "violations", "recommendations"]
             }
         },
-        required: ["Overall_Fit_Score", "Skill_Gaps", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft", "KSC_Responses_Drafts"]
+        required: ["Overall_Fit_Score", "Skill_Gaps", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft", "KSC_Responses_Drafts", "Resume_Audit", "Cover_Letter_Audit"]
     };
 
     const response = await ai.models.generateContent({
