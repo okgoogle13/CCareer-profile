@@ -39,6 +39,12 @@ export function CoverLetterSpecificMetrics({ score, wordCount }: CoverLetterSpec
       <h4 className="font-bold text-sm text-cyan-400 uppercase tracking-widest">Cover Letter Metrics</h4>
       
       <MetricBar
+        label="Keyword Placement"
+        value={score.keywordPlacement}
+        tooltip="Keywords found in the opening paragraph"
+      />
+      
+      <MetricBar
         label="Narrative Quality"
         value={score.narrativeQuality}
         tooltip="Story quality with specific examples and achievements"

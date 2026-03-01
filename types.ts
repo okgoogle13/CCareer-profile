@@ -188,6 +188,7 @@ export interface ATSScoreResult {
 }
 
 export interface CoverLetterScoreResult extends ATSScoreResult {
+  keywordPlacement: number;
   narrativeQuality: number;
   personalizationScore: number;
   toneProfessionalism: number;

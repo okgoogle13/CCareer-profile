@@ -11,11 +11,10 @@ export class ATSScorer {
   };
 
   private coverLetterWeights = {
-    keywordMatch: 0.35,
-    skillsAlignment: 0.20,
-    narrativeQuality: 0.20,
-    personalization: 0.15,
-    toneProfessionalism: 0.10
+    keywordDensity: 0.45,
+    keywordPlacement: 0.18,
+    skillsAlignment: 0.22,
+    formatCompliance: 0.15
   };
 
   public calculateScore(
@@ -74,18 +73,20 @@ export class ATSScorer {
     const coverLetterKeywords = this.extractKeywords(coverLetterText);
 
     const keywordMatchScore = this.scoreKeywordMatch(coverLetterKeywords, jobKeywords, coverLetterText, 'coverLetter');
+    const placementScore = this.scoreKeywordPlacement(coverLetterText, jobKeywords);
     const skillsScore = this.scoreSkillsAlignment(coverLetterText, jobDescription);
+    const formatScore = this.scoreCoverLetterFormat(coverLetterText);
+    
     const narrativeScore = this.scoreNarrativeQuality(coverLetterText);
     const personalizationScore = this.scorePersonalization(coverLetterText, jobDescription);
     const toneScore = this.scoreToneProfessionalism(coverLetterText);
     const lengthScore = this.scoreLengthCompliance(coverLetterText);
 
     const overallScore = Math.round(
-      (keywordMatchScore * 0.35) +
-      (skillsScore * 0.20) +
-      (narrativeScore * 0.20) +
-      (personalizationScore * 0.15) +
-      (toneScore * 0.10)
+      (keywordMatchScore * this.coverLetterWeights.keywordDensity) +
+      (placementScore * this.coverLetterWeights.keywordPlacement) +
+      (skillsScore * this.coverLetterWeights.skillsAlignment) +
+      (formatScore * this.coverLetterWeights.formatCompliance)
     );
 
     const callToActionPresent = this.detectCallToAction(coverLetterText);
@@ -95,7 +96,7 @@ export class ATSScorer {
       breakdown: {
         keywordMatch: keywordMatchScore,
         skillsAlignment: skillsScore,
-        formatCompliance: 100, // Not applicable for CL
+        formatCompliance: formatScore,
         jobTitleMatch: 100, // Not applicable for CL
         experienceRelevance: 100, // Not applicable for CL
         narrativeQuality: narrativeScore,
@@ -104,8 +105,9 @@ export class ATSScorer {
       },
       matchedKeywords: this.getMatchedKeywords(coverLetterKeywords, jobKeywords),
       missingKeywords: this.getMissingKeywords(coverLetterKeywords, jobKeywords),
-      suggestions: this.generateCoverLetterSuggestions(coverLetterText, jobDescription, narrativeScore, personalizationScore, callToActionPresent),
+      suggestions: this.generateCoverLetterSuggestions(coverLetterText, jobDescription, placementScore, formatScore, callToActionPresent),
       keywordDensity: this.calculateKeywordDensity(coverLetterText, jobKeywords),
+      keywordPlacement: placementScore,
       narrativeQuality: narrativeScore,
       personalizationScore: personalizationScore,
       toneProfessionalism: toneScore,
@@ -187,6 +189,38 @@ export class ATSScorer {
     
     const maxYears = Math.max(...resumeYears.map(y => parseInt(y)));
     return maxYears >= requiredYears ? 100 : (maxYears / requiredYears) * 100;
+  }
+
+  private scoreKeywordPlacement(
+    coverLetterText: string,
+    keywords: Set<string>
+  ): number {
+    const paragraphs = coverLetterText.split('\n\n').filter(p => p.trim().length > 0);
+    
+    if (paragraphs.length === 0 || keywords.size === 0) return 0;
+    
+    const firstParaKeywords = [...keywords].filter(kw =>
+      paragraphs[0].toLowerCase().includes(kw)
+    ).length;
+    
+    const otherParaKeywords = [...keywords].filter(kw =>
+      paragraphs.slice(1).join(' ').toLowerCase().includes(kw)
+    ).length;
+    
+    const placementScore = (
+      (firstParaKeywords / keywords.size) * 60 +
+      (otherParaKeywords / keywords.size) * 40
+    );
+    
+    return Math.min(100, placementScore);
+  }
+
+  private scoreCoverLetterFormat(text: string): number {
+    let score = 100;
+    const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
+    if (paragraphs.length < 3) score -= 20;
+    if (text.includes('Table') || text.includes('Chart')) score -= 20;
+    return Math.max(0, score);
   }
 
   private scoreFormatCompliance(text: string): number {
@@ -276,10 +310,10 @@ export class ATSScorer {
     return suggestions;
   }
 
-  private generateCoverLetterSuggestions(text: string, jobDescription: string, narrativeScore: number, personalizationScore: number, hasCTA: boolean): string[] {
+  private generateCoverLetterSuggestions(text: string, jobDescription: string, placementScore: number, formatScore: number, hasCTA: boolean): string[] {
     const suggestions: string[] = [];
-    if (narrativeScore < 70) suggestions.push('Add specific, quantifiable achievements');
-    if (personalizationScore < 60) suggestions.push('Mention the company name and show research about their work/mission');
+    if (placementScore < 60) suggestions.push('Include more job description keywords in your opening paragraph');
+    if (formatScore < 80) suggestions.push('Ensure simple paragraph formatting without tables or complex structures');
     if (!hasCTA) suggestions.push('Add a call to action expressing interest in an interview');
     return suggestions;
   }

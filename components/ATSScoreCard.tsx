@@ -10,12 +10,24 @@ interface ATSScoreCardProps {
 
 export function ATSScoreCard({ score, isCalculating, documentType }: ATSScoreCardProps) {
   const getScoreColor = (value: number) => {
+    if (documentType === 'coverLetter') {
+      if (value >= 90) return 'text-emerald-500';
+      if (value >= 80) return 'text-emerald-400';
+      if (value >= 70) return 'text-amber-500';
+      return 'text-rose-500';
+    }
     if (value >= 80) return 'text-emerald-500';
     if (value >= 60) return 'text-amber-500';
     return 'text-rose-500';
   };
 
   const getScoreBg = (value: number) => {
+    if (documentType === 'coverLetter') {
+      if (value >= 90) return 'stroke-emerald-500';
+      if (value >= 80) return 'stroke-emerald-400';
+      if (value >= 70) return 'stroke-amber-500';
+      return 'stroke-rose-500';
+    }
     if (value >= 80) return 'stroke-emerald-500';
     if (value >= 60) return 'stroke-amber-500';
     return 'stroke-rose-500';
@@ -54,9 +66,20 @@ export function ATSScoreCard({ score, isCalculating, documentType }: ATSScoreCar
           </div>
 
           <p className="text-center mt-4 text-sm text-gray-400">
-            {score.overallScore >= 80 && 'Excellent match! Your document is highly optimized.'}
-            {score.overallScore >= 60 && score.overallScore < 80 && 'Good match, but some optimization could help.'}
-            {score.overallScore < 60 && 'Needs significant optimization to pass ATS filters.'}
+            {documentType === 'coverLetter' ? (
+              <>
+                {score.overallScore >= 90 && 'Excellent match! Highly competitive for recruiter review.'}
+                {score.overallScore >= 80 && score.overallScore < 90 && 'Optimal match. Good chance of passing ATS.'}
+                {score.overallScore >= 70 && score.overallScore < 80 && 'Acceptable match. Some optimization recommended.'}
+                {score.overallScore < 70 && 'Failing match. High risk of automatic rejection.'}
+              </>
+            ) : (
+              <>
+                {score.overallScore >= 80 && 'Excellent match! Your document is highly optimized.'}
+                {score.overallScore >= 60 && score.overallScore < 80 && 'Good match, but some optimization could help.'}
+                {score.overallScore < 60 && 'Needs significant optimization to pass ATS filters.'}
+              </>
+            )}
           </p>
         </motion.div>
       )}
