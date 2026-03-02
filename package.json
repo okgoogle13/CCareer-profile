@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@google/genai": "^1.26.0",
-    "@supabase/supabase-js": "^2.98.0",
     "compromise": "^14.15.0",
     "cors": "^2.8.6",
     "docx": "^9.6.0",

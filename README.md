@@ -15,22 +15,23 @@ This project is a Chrome Extension that helps you tailor your resume and cover l
 
 ## Configuration
 
-### Supabase Authentication & Database
-To use the authentication and database features, you must configure Supabase for your extension:
+### Firebase Authentication & Database
+To use the authentication and database features, you must configure Firebase for your extension:
 
-1.  Go to the [Supabase Dashboard](https://supabase.com/dashboard).
+1.  Go to the [Firebase Console](https://console.firebase.google.com/).
 2.  Create a project or select your existing one.
-3.  Copy the configuration values (Project URL and anon key) into a `.env` file in the root directory:
+3.  Copy the configuration values into a `.env` file in the root directory:
     ```env
-    SUPABASE_URL=your_supabase_project_url
-    SUPABASE_ANON_KEY=your_supabase_anon_key
+    FIREBASE_API_KEY=your_api_key
+    FIREBASE_AUTH_DOMAIN=your_auth_domain
+    FIREBASE_PROJECT_ID=your_project_id
+    FIREBASE_STORAGE_BUCKET=your_storage_bucket
+    FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+    FIREBASE_APP_ID=your_app_id
     GEMINI_API_KEY=your_gemini_api_key
     ```
-4.  **Important:** In Supabase Authentication settings, add your extension ID to the "Redirect URLs" list.
-    -   After loading the extension in Chrome, copy the ID (e.g., `abcdefghijklmnop...`).
-    -   Go to Supabase Dashboard -> Authentication -> URL Configuration -> Redirect URLs.
-    -   Add `chrome-extension://<your-extension-id>/*`.
-    -   Ensure Google is enabled as an OAuth provider in Supabase.
+4.  **Important:** In Firebase Authentication settings, ensure Google is enabled as a sign-in provider.
+    -   You may need to add your Chrome Extension ID to the authorized domains in Firebase Authentication settings.
 
 ### Gemini API
 Ensure you have a valid Gemini API key in your `.env` file as `GEMINI_API_KEY`.

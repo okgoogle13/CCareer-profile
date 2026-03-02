@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User } from '@supabase/supabase-js';
+import { User } from 'firebase/auth';
 import { CareerDatabase, EntryType } from '../types';
 import { DocumentTextIcon } from './icons/DocumentTextIcon';
 import { ArrowPathIcon } from './icons/ArrowPathIcon';
@@ -12,8 +12,8 @@ interface UserProfileProps {
 }
 
 export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose }) => {
-  const displayName = user.user_metadata?.full_name || user.email;
-  const photoURL = user.user_metadata?.avatar_url;
+  const displayName = user.displayName || user.email;
+  const photoURL = user.photoURL;
   const downloadJSON = () => {
     if (!data) return;
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

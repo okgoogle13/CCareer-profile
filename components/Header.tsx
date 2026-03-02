@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { DocumentTextIcon } from './icons/DocumentTextIcon';
-import { User } from '@supabase/supabase-js';
+import { User } from 'firebase/auth';
 
 interface HeaderProps {
     user: User | null;
@@ -11,8 +11,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, onProfileClick }) => {
-  const displayName = user?.user_metadata?.full_name || user?.email;
-  const photoURL = user?.user_metadata?.avatar_url;
+  const displayName = user?.displayName || user?.email;
+  const photoURL = user?.photoURL;
 
   return (
     <header className="p-4 border-b border-gray-700 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">

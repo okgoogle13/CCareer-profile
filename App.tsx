@@ -6,8 +6,8 @@ import { DocumentInput } from './components/DocumentInput';
 import { processCareerDocuments } from './services/geminiService';
 import { ValidationDashboard } from './components/ValidationDashboard';
 import { ExclamationTriangleIcon } from './components/icons/ExclamationTriangleIcon';
-import { supabase, signIn, logout, getUserCareerData } from './services/supabase';
-import { User } from '@supabase/supabase-js';
+import { auth, signIn, logout, getUserCareerData } from './services/firebase';
+import { User, onAuthStateChanged } from 'firebase/auth';
 import { UserProfile } from './components/UserProfile';
 import { JobOpportunityExtractor } from './components/JobOpportunityExtractor';
 import { JobOpportunityView } from './components/JobOpportunityView';
@@ -48,33 +48,12 @@ const App: React.FC = () => {
 
   // Auth Listener
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setIsAuthLoading(false);
       
       if (currentUser) {
-        getUserCareerData(currentUser.id).then(existingData => {
-          if (existingData) {
-            setProcessedData(existingData);
-            setAppState(AppState.VALIDATING);
-            if (isExtension) {
-              setActiveTab('job');
-            }
-          }
-        });
-      }
-    });
-
-    // Listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setIsAuthLoading(false);
-      
-      if (currentUser) {
-        const existingData = await getUserCareerData(currentUser.id);
+        const existingData = await getUserCareerData(currentUser.uid);
         if (existingData) {
             setProcessedData(existingData);
             setAppState(AppState.VALIDATING);
@@ -87,7 +66,7 @@ const App: React.FC = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, [isExtension]);
 
   const handleLogin = async () => {
@@ -236,7 +215,7 @@ const App: React.FC = () => {
               <ValidationDashboard 
                 data={processedData} 
                 onUpdate={handleUpdateData} 
-                userId={user?.id}
+                userId={user?.uid}
               />
             )}
           </>
