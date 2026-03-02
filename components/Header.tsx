@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { DocumentTextIcon } from './icons/DocumentTextIcon';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 
 interface HeaderProps {
     user: User | null;
@@ -11,6 +11,9 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, onProfileClick }) => {
+  const displayName = user?.user_metadata?.full_name || user?.email;
+  const photoURL = user?.user_metadata?.avatar_url;
+
   return (
     <header className="p-4 border-b border-gray-700 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -25,16 +28,16 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, onProfi
             {user ? (
                 <div className="flex items-center gap-3">
                     <div className="text-right hidden sm:block">
-                        <p className="text-xs font-bold text-white">{user.displayName}</p>
+                        <p className="text-xs font-bold text-white">{displayName}</p>
                         <p className="text-[10px] text-gray-400">{user.email}</p>
                     </div>
-                    {user.photoURL && (
+                    {photoURL && (
                         <button 
                           onClick={onProfileClick}
                           className="hover:scale-110 transition-transform active:scale-95"
                           title="View Profile"
                         >
-                          <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-cyan-500/50 shadow-sm" />
+                          <img src={photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-cyan-500/50 shadow-sm" />
                         </button>
                     )}
                     <button 

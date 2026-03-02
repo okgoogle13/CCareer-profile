@@ -7,7 +7,7 @@ import { LightBulbIcon } from './icons/LightBulbIcon';
 import { ArrowPathIcon } from './icons/ArrowPathIcon';
 import { suggestTagsForItems, refineKSCResponse, refineAchievementField } from '../services/geminiService';
 import { TagIcon } from './icons/TagIcon';
-import { saveUserCareerData } from '../services/firebase';
+import { saveUserCareerData } from '../services/supabase';
 
 // --- Editable Field Component ---
 interface EditableFieldProps {

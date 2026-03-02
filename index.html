@@ -6,7 +6,6 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Career Database Pre-processor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @keyframes slideDown {
         from { opacity: 0; transform: translateY(-10px); }
@@ -29,23 +28,15 @@
         0%, 100% { opacity: 1; }
         50% { opacity: .5; }
       }
+      
+      /* Extension popup dimensions */
+      body {
+        min-width: 600px;
+        min-height: 500px;
+      }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.26.0",
-    "firebase/app": "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js",
-    "firebase/auth": "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js",
-    "firebase/firestore": "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "firebase/": "https://esm.sh/firebase@^12.7.0/"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+    <link rel="stylesheet" href="/index.css">
+  </head>
   <body class="bg-gray-900 text-gray-100">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>

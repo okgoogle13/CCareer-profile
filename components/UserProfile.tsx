@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { CareerDatabase, EntryType } from '../types';
 import { DocumentTextIcon } from './icons/DocumentTextIcon';
 import { ArrowPathIcon } from './icons/ArrowPathIcon';
@@ -12,6 +12,8 @@ interface UserProfileProps {
 }
 
 export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose }) => {
+  const displayName = user.user_metadata?.full_name || user.email;
+  const photoURL = user.user_metadata?.avatar_url;
   const downloadJSON = () => {
     if (!data) return;
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -150,18 +152,18 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose })
 
         <div className="p-8">
           <div className="flex flex-col items-center mb-8">
-            {user.photoURL ? (
+            {photoURL ? (
               <img 
-                src={user.photoURL} 
-                alt={user.displayName || 'User'} 
+                src={photoURL} 
+                alt={displayName || 'User'} 
                 className="w-24 h-24 rounded-full border-4 border-cyan-500/20 mb-4 shadow-lg"
               />
             ) : (
               <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center mb-4 border-4 border-cyan-500/20 shadow-lg">
-                 <span className="text-3xl font-bold text-cyan-400">{user.displayName?.charAt(0) || user.email?.charAt(0)}</span>
+                 <span className="text-3xl font-bold text-cyan-400">{displayName?.charAt(0) || user.email?.charAt(0)}</span>
               </div>
             )}
-            <h4 className="text-2xl font-bold text-white">{user.displayName || 'Anonymous User'}</h4>
+            <h4 className="text-2xl font-bold text-white">{displayName || 'Anonymous User'}</h4>
             <p className="text-gray-400">{user.email}</p>
           </div>
 

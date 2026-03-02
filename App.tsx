@@ -6,12 +6,13 @@ import { DocumentInput } from './components/DocumentInput';
 import { processCareerDocuments } from './services/geminiService';
 import { ValidationDashboard } from './components/ValidationDashboard';
 import { ExclamationTriangleIcon } from './components/icons/ExclamationTriangleIcon';
-import { auth, signIn, logout, getUserCareerData } from './services/firebase';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { supabase, signIn, logout, getUserCareerData } from './services/supabase';
+import { User } from '@supabase/supabase-js';
 import { UserProfile } from './components/UserProfile';
 import { JobOpportunityExtractor } from './components/JobOpportunityExtractor';
 import { JobOpportunityView } from './components/JobOpportunityView';
 import { MatchDashboard } from './components/MatchDashboard';
+import { useChromeExtension } from './hooks/useChromeExtension';
 
 // Helper to convert files to the generative part format
 const filesToGenerativeParts = async (files: File[]) => {
@@ -43,24 +44,51 @@ const App: React.FC = () => {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const [activeTab, setActiveTab] = useState<'database' | 'job' | 'match'>('database');
+  const { isExtension } = useChromeExtension();
 
   // Auth Listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       setIsAuthLoading(false);
       
-      if (firebaseUser) {
-        // Automatically try to load existing data for this user
-        const existingData = await getUserCareerData(firebaseUser.uid);
+      if (currentUser) {
+        getUserCareerData(currentUser.id).then(existingData => {
+          if (existingData) {
+            setProcessedData(existingData);
+            setAppState(AppState.VALIDATING);
+            if (isExtension) {
+              setActiveTab('job');
+            }
+          }
+        });
+      }
+    });
+
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setIsAuthLoading(false);
+      
+      if (currentUser) {
+        const existingData = await getUserCareerData(currentUser.id);
         if (existingData) {
             setProcessedData(existingData);
             setAppState(AppState.VALIDATING);
+            if (isExtension) {
+              setActiveTab('job');
+            }
         }
+      } else {
+        setProcessedData(null);
       }
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => subscription.unsubscribe();
+  }, [isExtension]);
 
   const handleLogin = async () => {
     try {
@@ -128,11 +156,11 @@ const App: React.FC = () => {
       )}
 
       {processedData && (
-        <div className="bg-gray-800 border-b border-gray-700 px-4">
-          <div className="max-w-6xl mx-auto flex gap-6">
+        <div className="bg-gray-800 border-b border-gray-700 px-2 sm:px-4">
+          <div className="max-w-6xl mx-auto flex gap-2 sm:gap-6 overflow-x-auto">
             <button
               onClick={() => setActiveTab('database')}
-              className={`py-4 px-2 font-bold border-b-2 transition-colors ${
+              className={`py-3 sm:py-4 px-2 text-sm sm:text-base font-bold border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'database' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-400 hover:text-gray-200'
               }`}
             >
@@ -140,7 +168,7 @@ const App: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('job')}
-              className={`py-4 px-2 font-bold border-b-2 transition-colors ${
+              className={`py-3 sm:py-4 px-2 text-sm sm:text-base font-bold border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'job' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-400 hover:text-gray-200'
               }`}
             >
@@ -150,7 +178,7 @@ const App: React.FC = () => {
               onClick={() => {
                 if (processedData && extractedJob) setActiveTab('match');
               }}
-              className={`py-4 px-2 font-bold border-b-2 transition-colors ${
+              className={`py-3 sm:py-4 px-2 text-sm sm:text-base font-bold border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'match' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-400 hover:text-gray-200'
               } ${(!processedData || !extractedJob) ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!processedData || !extractedJob}
@@ -208,7 +236,7 @@ const App: React.FC = () => {
               <ValidationDashboard 
                 data={processedData} 
                 onUpdate={handleUpdateData} 
-                userId={user?.uid}
+                userId={user?.id}
               />
             )}
           </>

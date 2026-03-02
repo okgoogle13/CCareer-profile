@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { JobOpportunity, CareerDatabase } from '../types';
 import { extractJobOpportunity } from '../services/geminiService';
+import { useChromeExtension } from '../hooks/useChromeExtension';
 
 interface JobOpportunityExtractorProps {
   onExtracted: (job: JobOpportunity) => void;
@@ -13,6 +14,33 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isExtension, currentUrl, extractJobFromPage } = useChromeExtension();
+
+  useEffect(() => {
+    if (isExtension && currentUrl) {
+      setUrl(currentUrl);
+      setInputType('url');
+    }
+  }, [isExtension, currentUrl]);
+
+  const handleExtractFromPage = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const pageText = await extractJobFromPage();
+      if (pageText) {
+        const job = await extractJobOpportunity('text', pageText, careerData || undefined);
+        onExtracted(job);
+      } else {
+        setError("Could not extract text from the current page. Please try pasting the text manually.");
+        setInputType('text');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleExtract = async () => {
     if (inputType === 'url' && !url) return;
@@ -45,6 +73,22 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
         Paste a URL or the plain text of a job posting to automatically extract its key particulars.
       </p>
       
+      {isExtension && (
+        <div className="mb-6 p-4 bg-cyan-900/30 border border-cyan-500/30 rounded-lg flex items-center justify-between">
+          <div>
+            <h4 className="text-cyan-400 font-bold mb-1">Current Page</h4>
+            <p className="text-sm text-gray-400 truncate max-w-md">{currentUrl || 'Loading...'}</p>
+          </div>
+          <button
+            onClick={handleExtractFromPage}
+            disabled={isLoading || !currentUrl}
+            className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm whitespace-nowrap"
+          >
+            {isLoading ? 'Extracting...' : 'Extract from Page'}
+          </button>
+        </div>
+      )}
+
       <div className="flex gap-4 mb-4 border-b border-gray-700 pb-4">
         <button 
           onClick={() => setInputType('url')}
