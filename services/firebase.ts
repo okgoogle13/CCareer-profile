@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { CareerDatabase } from '../types';
 
 const firebaseConfig = {
@@ -36,4 +36,8 @@ export const getUserCareerData = async (userId: string): Promise<CareerDatabase 
     return docSnap.data().career_data as CareerDatabase;
   }
   return null;
+};
+
+export const deleteUserCareerData = async (userId: string) => {
+  await deleteDoc(doc(db, 'users', userId));
 };

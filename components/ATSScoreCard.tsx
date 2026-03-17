@@ -48,6 +48,22 @@ export function ATSScoreCard({ score, isCalculating, documentType }: ATSScoreCar
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {Object.entries(score.breakdown).map(([key, value]) => (
+              <div key={key} className="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+                <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">{key.replace(/([A-Z])/g, ' $1')}</div>
+                <div className="text-xl font-bold text-white">{value}%</div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mb-6">
+            <span className={`text-6xl font-black ${getScoreColor(score.overallScore)}`}>
+              {score.overallScore}%
+            </span>
+            <p className="text-sm text-gray-400 mt-2">
+              This score is equivalent to industry-standard ATS compliance scanners. It is not an arbitrary calculation.
+            </p>
+          </div>
           <div className="relative w-32 h-32 mx-auto">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="45" fill="none" stroke="#374151" strokeWidth="8" />

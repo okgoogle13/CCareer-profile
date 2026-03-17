@@ -7,6 +7,7 @@ import { LightBulbIcon } from './icons/LightBulbIcon';
 import { ArrowPathIcon } from './icons/ArrowPathIcon';
 import { suggestTagsForItems, refineKSCResponse, refineAchievementField } from '../services/geminiService';
 import { TagIcon } from './icons/TagIcon';
+import { useAutoSave } from '../hooks/useAutoSave';
 import { saveUserCareerData } from '../services/firebase';
 
 // --- Editable Field Component ---
@@ -55,12 +56,13 @@ const EditableField: React.FC<EditableFieldProps> = ({
   if (editing) {
     return (
       <div className="relative group/field">
-        <div className="flex justify-between items-center mb-1">
-          <label className="block text-xs font-medium text-cyan-300">{label}</label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-widest">{label}</label>
           {suggestion && currentValue !== suggestion && (
             <button 
               onClick={applySuggestion}
-              className="text-[10px] bg-cyan-900/40 text-cyan-300 px-1.5 py-0.5 rounded flex items-center gap-1 hover:bg-cyan-800 transition-colors"
+              className="text-[10px] font-bold uppercase tracking-wider bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] text-[var(--sys-color-kr-activistSmokeGreen-steps-4)] border-2 border-[var(--sys-color-kr-activistSmokeGreen-base)] px-2 py-1 flex items-center gap-2 hover:bg-[var(--sys-color-kr-activistSmokeGreen-base)] hover:text-[var(--sys-color-charcoalBackground-base)] transition-colors"
+              style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
               title="Apply AI Suggestion"
             >
               <ArrowPathIcon className="w-3 h-3" /> Use AI Suggestion
@@ -72,7 +74,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
             value={currentValue}
             onChange={(e) => setCurrentValue(e.target.value)}
             onBlur={handleSave}
-            className="w-full p-2 bg-gray-900 border border-cyan-500 rounded-md text-sm min-h-[100px] focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full p-4 bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] text-base type-melancholyLonging min-h-[120px] focus:outline-none focus:border-[var(--sys-color-solidarityRed-base)] text-[var(--sys-color-paperWhite-base)]"
+            style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
             autoFocus
           />
         ) : (
@@ -82,7 +85,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
             onChange={(e) => setCurrentValue(e.target.value)}
             onBlur={handleSave}
             onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-            className="w-full p-2 bg-gray-900 border border-cyan-500 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full p-3 bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] text-base type-melancholyLonging focus:outline-none focus:border-[var(--sys-color-solidarityRed-base)] text-[var(--sys-color-paperWhite-base)]"
+            style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
             autoFocus
           />
         )}
@@ -94,50 +98,52 @@ const EditableField: React.FC<EditableFieldProps> = ({
 
   return (
     <div onClick={() => setEditing(true)} className="cursor-pointer group relative">
-      <div className="flex justify-between items-center mb-1">
-        <label className="block text-xs font-medium text-gray-400">{label}</label>
-        <div className="flex items-center gap-2">
+      <div className="flex justify-between items-center mb-2">
+        <label className="block text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-widest">{label}</label>
+        <div className="flex items-center gap-3">
             {isLoadingSuggestion && (
-                 <div className="w-3 h-3 border border-amber-400 border-t-transparent rounded-full animate-spin" />
+                 <div className="w-4 h-4 border-2 border-[var(--sys-color-concreteGrey-steps-0)] border-t-transparent rounded-full animate-spin" />
             )}
             {!hasSuggestion && onRequestSuggestion && !isLoadingSuggestion && (
                 <button 
                     onClick={triggerRequestSuggestion}
-                    className="text-[10px] bg-gray-800/80 text-cyan-500 hover:text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded transition-all flex items-center gap-1"
+                    className="text-[10px] font-bold uppercase tracking-wider bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-paperWhite-base)] hover:bg-[var(--sys-color-charcoalBackground-steps-4)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] px-3 py-1 transition-all flex items-center gap-2"
+                    style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                     title="Get AI Suggestion"
                 >
-                    <LightBulbIcon className="w-3 h-3" />
+                    <LightBulbIcon className="w-3 h-3 text-[var(--sys-color-stencilYellow-base)]" />
                     <span>AI Suggest</span>
                 </button>
             )}
             {hasSuggestion && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <button 
                         onClick={applySuggestion}
-                        className="text-[10px] bg-amber-900/40 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded flex items-center gap-1 hover:bg-amber-800 transition-all shadow-sm"
+                        className="text-[10px] font-bold uppercase tracking-wider bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] text-[var(--sys-color-kr-activistSmokeGreen-steps-4)] border-2 border-[var(--sys-color-kr-activistSmokeGreen-base)] px-3 py-1 flex items-center gap-2 hover:bg-[var(--sys-color-kr-activistSmokeGreen-base)] hover:text-[var(--sys-color-charcoalBackground-base)] transition-all shadow-[var(--sys-shadow-elevation1Resting)]"
+                        style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                         title="Apply AI Suggestion"
                     >
                         <ArrowPathIcon className="w-3 h-3" /> Apply Suggestion
                     </button>
-                    <LightBulbIcon className="w-4 h-4 text-amber-400 opacity-50 group-hover:opacity-100 transition-opacity" />
+                    <LightBulbIcon className="w-5 h-5 text-[var(--sys-color-stencilYellow-base)] opacity-50 group-hover:opacity-100 transition-opacity" />
                 </div>
             )}
         </div>
       </div>
-      <p className="text-sm p-2 bg-gray-700/50 rounded-md group-hover:bg-gray-600/50 transition-colors whitespace-pre-wrap min-h-[40px]">
+      <p className="text-base type-melancholyLonging p-4 bg-[var(--sys-color-charcoalBackground-steps-2)] group-hover:bg-[var(--sys-color-charcoalBackground-steps-3)] transition-colors whitespace-pre-wrap min-h-[60px] text-[var(--sys-color-paperWhite-base)] border-2 border-transparent group-hover:border-[var(--sys-color-concreteGrey-steps-0)]" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
         {value || 'N/A'}
       </p>
       {hasSuggestion && (
-        <div className="hidden group-hover:block absolute z-20 top-full left-0 right-0 mt-2 p-3 bg-gray-800 border border-amber-500/30 rounded shadow-xl text-xs text-gray-300 animate-fade-in">
-           <p className="font-bold text-amber-400 mb-1 flex items-center gap-1">
-             <LightBulbIcon className="w-3 h-3" /> Suggestion:
+        <div className="hidden group-hover:block absolute z-20 top-full left-0 right-0 mt-3 p-4 bg-[var(--sys-color-charcoalBackground-steps-1)] border-2 border-[var(--sys-color-stencilYellow-base)] shadow-[var(--sys-shadow-elevation3HoverLift)] text-sm text-[var(--sys-color-paperWhite-base)] animate-fade-in" style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+           <p className="font-bold text-[var(--sys-color-stencilYellow-base)] mb-2 flex items-center gap-2 uppercase tracking-widest text-xs">
+             <LightBulbIcon className="w-4 h-4" /> Suggestion:
            </p>
-           <p className="italic mb-2 text-gray-300 line-clamp-3">{suggestion}</p>
+           <p className="type-melancholyLonging mb-4 text-[var(--sys-color-worker-ash-base)] line-clamp-3">{suggestion}</p>
            <button 
             onClick={applySuggestion}
-            className="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1"
+            className="text-[var(--sys-color-kr-activistSmokeGreen-base)] hover:text-[var(--sys-color-paperWhite-base)] font-bold flex items-center gap-2 uppercase tracking-wider text-xs"
            >
-             <ArrowPathIcon className="w-3 h-3" /> Apply this suggestion
+             <ArrowPathIcon className="w-4 h-4" /> Apply this suggestion
            </button>
         </div>
       )}
@@ -146,11 +152,11 @@ const EditableField: React.FC<EditableFieldProps> = ({
 };
 
 // --- Tag Component ---
-const Tag: React.FC<{ children: React.ReactNode; onRemove?: () => void; colorClass?: string }> = ({ children, onRemove, colorClass = "bg-cyan-900/50 text-cyan-300 border-cyan-700/30" }) => (
-  <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${colorClass}`}>
+const Tag: React.FC<{ children: React.ReactNode; onRemove?: () => void; colorClass?: string }> = ({ children, onRemove, colorClass = "bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-paperWhite-base)] border-[var(--sys-color-concreteGrey-steps-0)]" }) => (
+  <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-3 py-1 border-2 ${colorClass}`} style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
     {children}
     {onRemove && (
-      <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="hover:text-red-400 ml-1 transition-colors leading-none text-sm">×</button>
+      <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="hover:text-[var(--sys-color-solidarityRed-base)] ml-2 transition-colors leading-none text-base">×</button>
     )}
   </span>
 );
@@ -164,15 +170,16 @@ const InlineTagAdder: React.FC<{ onAdd: (tag: string) => void }> = ({ onAdd }) =
     return (
       <button 
         onClick={() => setIsAdding(true)}
-        className="text-[10px] text-cyan-400/70 hover:text-cyan-300 border border-cyan-500/20 border-dashed px-2 py-0.5 rounded-full flex items-center gap-1 transition-all hover:border-cyan-500/50"
+        className="text-xs font-bold uppercase tracking-widest text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] border-dashed px-3 py-1 flex items-center gap-2 transition-all hover:border-[var(--sys-color-paperWhite-base)]"
+        style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
       >
-        <span className="text-sm leading-none">+</span> Add Tag
+        <span className="text-base leading-none">+</span> Add Tag
       </button>
     );
   }
 
   return (
-    <div className="flex items-center gap-1 animate-fade-in">
+    <div className="flex items-center gap-2 animate-fade-in">
       <input 
         type="text" 
         autoFocus
@@ -188,8 +195,9 @@ const InlineTagAdder: React.FC<{ onAdd: (tag: string) => void }> = ({ onAdd }) =
             setIsAdding(false);
           }
         }}
-        className="text-[10px] bg-gray-900 border border-cyan-500/50 rounded-full px-2 py-0.5 w-24 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-        placeholder="tag..."
+        className="text-xs font-bold uppercase tracking-widest bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] px-3 py-1 w-32 text-[var(--sys-color-paperWhite-base)] focus:outline-none focus:border-[var(--sys-color-solidarityRed-base)]"
+        style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
+        placeholder="TAG..."
       />
     </div>
   );
@@ -283,26 +291,27 @@ const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onU
     }, [allAchievements, ksc.Linked_Entry_ID]);
 
     return (
-        <div className={`relative p-6 rounded-lg bg-gray-800 border transition-all ${isSelected ? 'ring-2 ring-cyan-500 border-cyan-500 bg-gray-800/80' : ksc.Needs_Review_Flag ? 'border-amber-500/50' : 'border-gray-700/50'}`}>
+        <div className={`relative p-8 bg-[var(--sys-color-charcoalBackground-steps-1)] border-2 transition-all ${isSelected ? 'ring-4 ring-[var(--sys-color-solidarityRed-base)] border-[var(--sys-color-solidarityRed-base)] bg-[var(--sys-color-charcoalBackground-steps-2)]' : ksc.Needs_Review_Flag ? 'border-[var(--sys-color-solidarityRed-base)]' : 'border-[var(--sys-color-concreteGrey-steps-0)]'}`} style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
             {isRefining && (
-                <div className="absolute inset-0 z-10 bg-gray-900/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-lg animate-fade-in">
-                    <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-2" />
-                    <p className="text-sm font-bold text-cyan-300">AI is analyzing your current draft...</p>
+                <div className="absolute inset-0 z-10 bg-[var(--sys-color-charcoalBackground-base)]/80 backdrop-blur-sm flex flex-col items-center justify-center animate-fade-in" style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+                    <div className="w-12 h-12 border-4 border-[var(--sys-color-concreteGrey-steps-0)] border-t-[var(--sys-color-solidarityRed-base)] rounded-full animate-spin mb-4" />
+                    <p className="text-lg font-bold text-[var(--sys-color-paperWhite-base)] uppercase tracking-widest">AI is analyzing your current draft...</p>
                 </div>
             )}
 
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-6">
                 <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Selection Criteria Prompt</h4>
-                        <div className="flex-1 border-t border-gray-700/50"></div>
+                    <div className="flex items-center gap-4 mb-4">
+                        <h4 className="text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-widest">Selection Criteria Prompt</h4>
+                        <div className="flex-1 border-t-2 border-[var(--sys-color-concreteGrey-steps-0)]"></div>
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap">Linked Experience:</label>
+                            <div className="flex items-center gap-3">
+                                <label className="text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase whitespace-nowrap">Linked Experience:</label>
                                 <select 
                                     value={ksc.Linked_Entry_ID || ''}
                                     onChange={(e) => handleUpdate('Linked_Entry_ID', e.target.value || undefined)}
-                                    className="text-[10px] bg-gray-900 border border-gray-700 rounded px-1.5 py-0.5 text-cyan-400 focus:ring-1 focus:ring-cyan-500 focus:outline-none max-w-[150px] truncate"
+                                    className="text-xs font-bold uppercase tracking-widest bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] px-3 py-1.5 text-[var(--sys-color-paperWhite-base)] focus:border-[var(--sys-color-solidarityRed-base)] focus:outline-none max-w-[200px] truncate cursor-pointer appearance-none"
+                                    style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                                 >
                                     <option value="">None</option>
                                     {allEntries.map(entry => (
@@ -314,20 +323,21 @@ const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onU
                             </div>
                         </div>
                     </div>
-                    <p className="text-lg font-medium text-cyan-100">{ksc.KSC_Prompt}</p>
+                    <p className="text-2xl type-solidarityProtest text-[var(--sys-color-paperWhite-base)] uppercase tracking-tight">{ksc.KSC_Prompt}</p>
                 </div>
                 <input 
                     type="checkbox" 
                     checked={isSelected} 
                     onChange={onToggleSelect}
-                    className="ml-4 h-6 w-6 rounded border-gray-600 text-cyan-600 focus:ring-cyan-500 bg-gray-900 cursor-pointer"
+                    className="ml-6 h-6 w-6 border-2 border-[var(--sys-color-concreteGrey-steps-0)] text-[var(--sys-color-solidarityRed-base)] focus:ring-[var(--sys-color-solidarityRed-base)] bg-[var(--sys-color-charcoalBackground-steps-0)] cursor-pointer"
+                    style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                 />
             </div>
 
             {/* Linking Achievements UI */}
             {ksc.Linked_Entry_ID && filteredAchievementsForLink.length > 0 && (
-              <div className="mb-4 p-3 bg-gray-900/40 rounded border border-cyan-900/30">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Link Specific Achievements</label>
+              <div className="mb-6 p-4 bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-[var(--sys-color-concreteGrey-steps-0)]" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
+                <label className="text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-widest block mb-3">Link Specific Achievements</label>
                 
                 <div className="mb-2">
                   <input
@@ -335,9 +345,10 @@ const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onU
                     placeholder="Search achievements to link..."
                     value={achievementSearchTerm}
                     onChange={(e) => setAchievementSearchTerm(e.target.value)}
-                    className="w-full text-xs bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-gray-300 focus:ring-1 focus:ring-cyan-500 focus:outline-none mb-2 placeholder-gray-600"
+                    className="w-full text-sm type-melancholyLonging bg-[var(--sys-color-charcoalBackground-steps-2)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] px-3 py-2 text-[var(--sys-color-paperWhite-base)] focus:border-[var(--sys-color-solidarityRed-base)] focus:outline-none mb-3 placeholder-[var(--sys-color-worker-ash-base)]"
+                    style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                   />
-                  <div className="max-h-32 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
+                  <div className="max-h-40 overflow-y-auto flex flex-col gap-2 pr-2 custom-scrollbar">
                     {filteredAchievementsForLink
                       .filter(ach => {
                         const searchStr = `${ach.Action_Verb} ${ach.Noun_Task} ${ach.Strategy} ${ach.Outcome}`.toLowerCase();
@@ -349,13 +360,14 @@ const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onU
                           <button
                             key={ach.Achievement_ID}
                             onClick={() => toggleLinkedAchievement(ach.Achievement_ID)}
-                            className={`text-left text-[10px] px-2 py-1.5 rounded transition-all flex items-start gap-2 border ${
+                            className={`text-left text-sm type-melancholyLonging px-3 py-2 transition-all flex items-start gap-3 border-2 ${
                               isLinked 
-                              ? 'bg-cyan-900/40 border-cyan-500 text-cyan-300' 
-                              : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-cyan-500/50 hover:text-cyan-300'
+                              ? 'bg-[var(--sys-color-charcoalBackground-steps-3)] border-[var(--sys-color-solidarityRed-base)] text-[var(--sys-color-paperWhite-base)]' 
+                              : 'bg-[var(--sys-color-charcoalBackground-steps-1)] border-[var(--sys-color-concreteGrey-steps-0)] text-[var(--sys-color-worker-ash-base)] hover:border-[var(--sys-color-paperWhite-base)] hover:text-[var(--sys-color-paperWhite-base)]'
                             }`}
+                            style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                           >
-                            <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${isLinked ? 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]' : 'bg-gray-600'}`} />
+                            <div className={`w-3 h-3 mt-1 shrink-0 border-2 ${isLinked ? 'bg-[var(--sys-color-solidarityRed-base)] border-[var(--sys-color-solidarityRed-base)]' : 'bg-transparent border-[var(--sys-color-concreteGrey-steps-0)]'}`} style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }} />
                             <span className="line-clamp-2">{ach.Action_Verb} {ach.Noun_Task} {ach.Strategy} resulting in {ach.Outcome}</span>
                           </button>
                         );
@@ -365,31 +377,33 @@ const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onU
               </div>
             )}
 
-            <div className="flex flex-col gap-2 bg-amber-900/20 border border-amber-500/30 p-4 rounded-md mb-6 relative">
-                <div className="flex items-center justify-between gap-2 text-amber-400 mb-1">
-                    <div className="flex items-center gap-2">
-                        <ExclamationTriangleIcon className="w-6 h-6" />
-                        <span className="font-bold">STAR Method Critique</span>
+            <div className="flex flex-col gap-3 bg-[var(--sys-color-kr-charcoalRed-steps-0)] border-2 border-[var(--sys-color-solidarityRed-base)] p-6 mb-8 relative" style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+                <div className="flex items-center justify-between gap-3 text-[var(--sys-color-solidarityRed-base)] mb-2">
+                    <div className="flex items-center gap-3">
+                        <ExclamationTriangleIcon className="w-8 h-8" />
+                        <span className="text-xl type-solidarityProtest uppercase tracking-tight">STAR Method Critique</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       {hasAnySuggestions && (
                          <button 
                             onClick={handleBulkApplySuggestions}
-                            className="text-[10px] px-3 py-1 bg-cyan-600/20 text-cyan-300 border border-cyan-500/40 rounded hover:bg-cyan-500/30 transition-all flex items-center gap-2 font-bold"
+                            className="text-xs px-4 py-2 bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] text-[var(--sys-color-kr-activistSmokeGreen-steps-4)] border-2 border-[var(--sys-color-kr-activistSmokeGreen-base)] hover:bg-[var(--sys-color-kr-activistSmokeGreen-base)] hover:text-[var(--sys-color-charcoalBackground-base)] transition-all flex items-center gap-2 font-bold uppercase tracking-wider shadow-[var(--sys-shadow-elevation2Placard)]"
+                            style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                         >
-                            <ArrowPathIcon className="w-3 h-3" /> Bulk Apply Suggestions
+                            <ArrowPathIcon className="w-4 h-4" /> Bulk Apply Suggestions
                         </button>
                       )}
                       <button 
                           onClick={handleRefine}
                           disabled={isRefining}
-                          className="text-xs px-3 py-1.5 bg-amber-600/20 text-amber-300 border border-amber-500/40 rounded hover:bg-amber-500/30 transition-all flex items-center gap-2 shadow-sm"
+                          className="text-xs px-4 py-2 bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-stencilYellow-base)] border-2 border-[var(--sys-color-stencilYellow-base)] hover:bg-[var(--sys-color-stencilYellow-base)] hover:text-[var(--sys-color-charcoalBackground-base)] transition-all flex items-center gap-2 font-bold uppercase tracking-wider shadow-[var(--sys-shadow-elevation2Placard)]"
+                          style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                       >
                           <LightBulbIcon className="w-4 h-4" /> Optimize STAR Draft
                       </button>
                     </div>
                 </div>
-                <p className="text-sm text-amber-200 leading-relaxed">{ksc.STAR_Feedback}</p>
+                <p className="type-melancholyLonging text-base text-[var(--sys-color-paperWhite-base)] leading-relaxed">{ksc.STAR_Feedback}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
@@ -423,18 +437,19 @@ const KSCItem: React.FC<KSCItemProps> = ({ ksc, allEntries, allAchievements, onU
                 />
             </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-700">
-                <div className="flex flex-wrap gap-2 items-center">
+            <div className="mt-8 pt-8 border-t-2 border-[var(--sys-color-concreteGrey-steps-0)]">
+                <div className="flex flex-wrap gap-3 items-center">
                     {ksc.Subtype_Tags.map(tag => <Tag key={tag} onRemove={() => removeTag(tag)}>{tag}</Tag>)}
                     <InlineTagAdder onAdd={addTag} />
-                    {ksc.Skills_Used.map(skill => <Tag key={skill} colorClass="bg-gray-700/50 text-gray-300 border-gray-600/30">{skill}</Tag>)}
+                    {ksc.Skills_Used.map(skill => <Tag key={skill} colorClass="bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-paperWhite-base)] border-[var(--sys-color-concreteGrey-steps-0)]">{skill}</Tag>)}
                 </div>
             </div>
             
-            <div className="mt-4 flex gap-3">
+            <div className="mt-6 flex gap-4">
                 <button 
                     onClick={() => onUpdate({...ksc, Needs_Review_Flag: false})}
-                    className={`text-xs px-3 py-1 rounded transition-colors ${ksc.Needs_Review_Flag ? 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/40' : 'bg-green-900/20 text-green-400'}`}
+                    className={`text-sm font-bold uppercase tracking-wider px-4 py-2 border-2 transition-colors shadow-[var(--sys-shadow-elevation2Placard)] ${ksc.Needs_Review_Flag ? 'bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-stencilYellow-base)] border-[var(--sys-color-stencilYellow-base)] hover:bg-[var(--sys-color-stencilYellow-base)] hover:text-[var(--sys-color-charcoalBackground-base)]' : 'bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] text-[var(--sys-color-kr-activistSmokeGreen-steps-4)] border-[var(--sys-color-kr-activistSmokeGreen-base)]'}`}
+                    style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                 >
                     {ksc.Needs_Review_Flag ? 'Mark as Validated' : '✓ Validated'}
                 </button>
@@ -524,25 +539,26 @@ const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, onUpdate
   }, [achievement.Improvement_Suggestions, achievement.Action_Verb, achievement.Noun_Task, achievement.Metric, achievement.Strategy, achievement.Outcome]);
 
   return (
-      <div className={`p-5 rounded-lg bg-gray-800/40 border transition-all ${achievement.Needs_Review_Flag ? 'border-amber-500/40 bg-amber-900/5' : 'border-gray-700/50'}`}>
-          <div className="flex justify-between items-start mb-4">
+      <div className={`p-6 bg-[var(--sys-color-charcoalBackground-steps-1)] border-2 transition-all ${achievement.Needs_Review_Flag ? 'border-[var(--sys-color-solidarityRed-base)] bg-[var(--sys-color-kr-charcoalRed-steps-0)]' : 'border-[var(--sys-color-concreteGrey-steps-0)]'}`} style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+          <div className="flex justify-between items-start mb-6">
               <div className="flex-1">
-                <p className="text-gray-400 text-sm italic leading-relaxed border-l-2 border-cyan-500/30 pl-3 flex-1 mb-2">
+                <p className="type-melancholyLonging text-[var(--sys-color-worker-ash-base)] text-base italic leading-relaxed border-l-4 border-[var(--sys-color-solidarityRed-base)] pl-4 flex-1 mb-4">
                   "{achievement.Original_Text}"
                 </p>
                 <div className="flex items-center gap-3">
                   {achievement.Needs_Review_Flag && (
-                      <div className="flex items-center gap-1 text-amber-400 text-[10px] font-bold uppercase tracking-wider bg-amber-900/30 px-2 py-1 rounded border border-amber-500/30">
-                          <ExclamationTriangleIcon className="w-3 h-3" />
+                      <div className="flex items-center gap-2 text-[var(--sys-color-solidarityRed-base)] text-xs font-bold uppercase tracking-widest bg-[var(--sys-color-kr-charcoalRed-steps-1)] px-3 py-1.5 border-2 border-[var(--sys-color-solidarityRed-base)]" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
+                          <ExclamationTriangleIcon className="w-4 h-4" />
                           <span>Missing Metric</span>
                       </div>
                   )}
                   {hasAnySuggestions && (
                     <button 
                         onClick={handleAutoApplyAllSuggestions}
-                        className="text-[10px] px-2 py-1 bg-cyan-600/20 text-cyan-300 border border-cyan-500/40 rounded hover:bg-cyan-500/30 transition-all flex items-center gap-1.5 font-bold shadow-sm"
+                        className="text-xs px-3 py-1.5 bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] text-[var(--sys-color-kr-activistSmokeGreen-steps-4)] border-2 border-[var(--sys-color-kr-activistSmokeGreen-base)] hover:bg-[var(--sys-color-kr-activistSmokeGreen-base)] hover:text-[var(--sys-color-charcoalBackground-base)] transition-all flex items-center gap-2 font-bold uppercase tracking-wider shadow-[var(--sys-shadow-elevation2Placard)]"
+                        style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                     >
-                        <ArrowPathIcon className="w-3 h-3" /> Auto-Apply Suggestions
+                        <ArrowPathIcon className="w-4 h-4" /> Auto-Apply Suggestions
                     </button>
                   )}
                 </div>
@@ -592,11 +608,11 @@ const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, onUpdate
               />
           </div>
 
-          <div className="mt-5 pt-4 border-t border-gray-700/50">
-              <div className="space-y-3">
+          <div className="mt-6 pt-6 border-t-2 border-[var(--sys-color-concreteGrey-steps-0)]">
+              <div className="space-y-4">
                   {/* Managed Subtype Tags */}
                   <div>
-                    <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest block mb-2">Strategy & Capability Tags</span>
+                    <span className="text-xs font-bold text-[var(--sys-color-stencilYellow-base)] uppercase tracking-widest block mb-3">Strategy & Capability Tags</span>
                     <div className="flex flex-wrap gap-2 items-center">
                         {achievement.Subtype_Tags.map(tag => (
                             <Tag key={tag} onRemove={() => removeTag(tag)}>
@@ -609,23 +625,23 @@ const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, onUpdate
 
                   {/* Read-only Extracted Skills & Tools */}
                   {(achievement.Skills_Used.length > 0 || achievement.Tools_Used.length > 0) && (
-                      <div className="flex flex-wrap gap-x-6 gap-y-3">
+                      <div className="flex flex-wrap gap-x-8 gap-y-4">
                         {achievement.Skills_Used.length > 0 && (
                             <div>
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-1.5">Extracted Skills</span>
-                                <div className="flex flex-wrap gap-1.5">
+                                <span className="text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-widest block mb-2">Extracted Skills</span>
+                                <div className="flex flex-wrap gap-2">
                                     {achievement.Skills_Used.map(skill => (
-                                        <Tag key={skill} colorClass="bg-gray-700/30 text-gray-400 border-gray-600/20">{skill}</Tag>
+                                        <Tag key={skill} colorClass="bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-paperWhite-base)] border-[var(--sys-color-concreteGrey-steps-0)]">{skill}</Tag>
                                     ))}
                                 </div>
                             </div>
                         )}
                         {achievement.Tools_Used.length > 0 && (
                             <div>
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-1.5">Tools/Software</span>
-                                <div className="flex flex-wrap gap-1.5">
+                                <span className="text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-widest block mb-2">Tools/Software</span>
+                                <div className="flex flex-wrap gap-2">
                                     {achievement.Tools_Used.map(tool => (
-                                        <Tag key={tool} colorClass="bg-gray-700/30 text-gray-400 border-gray-600/20">{tool}</Tag>
+                                        <Tag key={tool} colorClass="bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-paperWhite-base)] border-[var(--sys-color-concreteGrey-steps-0)]">{tool}</Tag>
                                     ))}
                                 </div>
                             </div>
@@ -661,45 +677,46 @@ const CareerEntryCard: React.FC<CareerEntryCardProps> = ({ entry, achievements, 
     };
 
     return (
-        <div className={`bg-gray-800 rounded-lg overflow-hidden shadow-lg border transition-all ${isSelected ? 'ring-2 ring-cyan-500 border-cyan-500' : 'border-gray-700'}`}>
-            <div className="flex items-center bg-gray-700/50">
+        <div className={`bg-[var(--sys-color-charcoalBackground-steps-0)] overflow-hidden shadow-[var(--sys-shadow-elevation2Placard)] border-2 transition-all ${isSelected ? 'ring-4 ring-[var(--sys-color-solidarityRed-base)] border-[var(--sys-color-solidarityRed-base)]' : 'border-[var(--sys-color-concreteGrey-steps-0)]'}`} style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+            <div className="flex items-center bg-[var(--sys-color-charcoalBackground-steps-2)] border-b-2 border-[var(--sys-color-concreteGrey-steps-0)]">
                  <input 
                     type="checkbox" 
                     checked={isSelected} 
                     onChange={onToggleSelect}
-                    className="ml-4 h-6 w-6 rounded border-gray-600 text-cyan-600 focus:ring-cyan-500 bg-gray-900 cursor-pointer"
+                    className="ml-6 h-6 w-6 border-2 border-[var(--sys-color-concreteGrey-steps-0)] text-[var(--sys-color-solidarityRed-base)] focus:ring-[var(--sys-color-solidarityRed-base)] bg-[var(--sys-color-charcoalBackground-steps-0)] cursor-pointer"
+                    style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                 />
-                <button onClick={() => setIsOpen(!isOpen)} className="flex-1 p-4 hover:bg-gray-700 transition-colors flex justify-between items-center text-left">
+                <button onClick={() => setIsOpen(!isOpen)} className="flex-1 p-6 hover:bg-[var(--sys-color-charcoalBackground-steps-3)] transition-colors flex justify-between items-center text-left">
                     <div>
-                        <h3 className="text-xl font-bold text-cyan-300">{entry.Role}</h3>
-                        <p className="text-gray-300 text-sm">{entry.Organization} | {entry.StartDate} - {entry.EndDate}</p>
+                        <h3 className="text-2xl type-solidarityProtest text-[var(--sys-color-paperWhite-base)] uppercase tracking-tight">{entry.Role}</h3>
+                        <p className="text-[var(--sys-color-worker-ash-base)] text-sm font-bold uppercase tracking-widest mt-1">{entry.Organization} <span className="text-[var(--sys-color-solidarityRed-base)]">|</span> {entry.StartDate} - {entry.EndDate}</p>
                     </div>
-                    <ChevronDownIcon className={`w-6 h-6 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDownIcon className={`w-8 h-8 text-[var(--sys-color-worker-ash-base)] transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                 </button>
             </div>
             {isOpen && (
-                 <div className="p-6">
-                    <div className="mb-6 flex flex-wrap gap-2 items-center">
+                 <div className="p-8">
+                    <div className="mb-8 flex flex-wrap gap-3 items-center">
                         {entry.Subtype_Tags.map(tag => (
                             <Tag key={tag} onRemove={() => removeTag(tag)}>{tag}</Tag>
                         ))}
                         <InlineTagAdder onAdd={addTag} />
                     </div>
-                    <div className="bg-gray-900/40 p-3 rounded border border-gray-700/50 mb-8">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Responsibilities Scope</span>
-                        <p className="text-gray-400 text-sm italic">{entry.Core_Responsibilities_Scope}</p>
+                    <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] p-4 border-2 border-[var(--sys-color-concreteGrey-steps-0)] mb-10" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
+                        <span className="text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-widest block mb-2">Responsibilities Scope</span>
+                        <p className="type-melancholyLonging text-[var(--sys-color-paperWhite-base)] text-base">{entry.Core_Responsibilities_Scope}</p>
                     </div>
 
-                    <h4 className="text-lg font-semibold text-cyan-400 mb-4 flex items-center gap-2">
-                        <ArrowPathIcon className="w-5 h-5" /> Structured Achievements
+                    <h4 className="text-xl type-solidarityProtest text-[var(--sys-color-paperWhite-base)] mb-6 flex items-center gap-3 uppercase tracking-tight">
+                        <ArrowPathIcon className="w-6 h-6 text-[var(--sys-color-solidarityRed-base)]" /> Structured Achievements
                     </h4>
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         {achievements.length > 0 ? (
                             achievements.map(ach => (
                                 <AchievementItem key={ach.Achievement_ID} achievement={ach} onUpdate={onUpdateAchievement}/>
                             ))
                         ) : (
-                            <p className="text-gray-500 text-sm">No achievements linked to this entry.</p>
+                            <p className="text-[var(--sys-color-worker-ash-base)] text-base italic">No achievements linked to this entry.</p>
                         )}
                     </div>
                 </div>
@@ -717,6 +734,7 @@ interface ValidationDashboardProps {
 }
 
 export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, onUpdate, userId }) => {
+  const { isSaving, lastSaved, save } = useAutoSave(userId, data, (data) => saveUserCareerData(userId!, data));
   const [showNeedsReviewOnly, setShowNeedsReviewOnly] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkTagInput, setBulkTagInput] = useState('');
@@ -729,7 +747,6 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
 
   // Sync state
   const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [lastSaved, setLastSaved] = useState<string | null>(null);
 
   const handleAchievementUpdate = useCallback((updatedAchievement: StructuredAchievement) => {
       const newAchievements = data.Structured_Achievements.map(ach => 
@@ -795,12 +812,9 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
 
   const handleSyncToCloud = async () => {
     if (!userId) return;
-    setSyncStatus('saving');
     try {
-        await saveUserCareerData(userId, data);
+        await save(data);
         setSyncStatus('saved');
-        setLastSaved(new Date().toLocaleTimeString());
-        setTimeout(() => setSyncStatus('idle'), 3000);
     } catch (err) {
         console.error("Sync failed", err);
         setSyncStatus('error');
@@ -887,13 +901,57 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
     }));
   }, [data.Career_Entries, data.Structured_Achievements, filteredAchievements, showNeedsReviewOnly]);
 
+  const completenessScore = useMemo(() => {
+    let score = 0;
+    let totalWeight = 0;
+
+    // 1. Personal Info (10%)
+    totalWeight += 10;
+    const pi = data.Personal_Information;
+    if (pi.FullName && pi.Email && pi.Phone) score += 10;
+
+    // 2. Career Profile (10%)
+    totalWeight += 10;
+    if (data.Career_Profile.Target_Titles.length > 0 && data.Career_Profile.Master_Summary_Points.length > 0) score += 10;
+
+    // 3. Entries (30%)
+    totalWeight += 30;
+    if (data.Career_Entries.length > 0) score += 30;
+
+    // 4. Achievements (30%)
+    totalWeight += 30;
+    const achievementsWithMetrics = data.Structured_Achievements.filter(a => a.Metric && !a.Metric.toLowerCase().includes('x'));
+    if (data.Structured_Achievements.length > 0) {
+        score += 15; // Have some achievements
+        if (achievementsWithMetrics.length / data.Structured_Achievements.length > 0.5) {
+            score += 15; // More than half have metrics
+        }
+    }
+
+    // 5. KSCs (20%)
+    totalWeight += 20;
+    if (data.KSC_Responses.length > 0) score += 20;
+
+    return Math.round((score / totalWeight) * 100);
+  }, [data]);
+
   return (
     <div className="p-8 mx-auto max-w-7xl relative animate-fade-in">
-        <div className="flex justify-between items-end mb-6">
-            <h2 className="text-3xl font-bold text-cyan-300">2. Validate Processed Data</h2>
+        <div className="flex justify-between items-end mb-8">
+            <h2 className="text-5xl type-solidarityProtest text-[var(--sys-color-paperWhite-base)] uppercase tracking-tighter">2. Validate <span className="text-[var(--sys-color-solidarityRed-base)]">Processed Data</span></h2>
             <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-[var(--sys-color-charcoalBackground-steps-2)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] px-4 py-2" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
+                    <span className="text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-widest">Profile Completeness</span>
+                    <div className="w-24 h-3 bg-[var(--sys-color-charcoalBackground-steps-4)] overflow-hidden" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
+                        <div 
+                            className={`h-full transition-all duration-500 ${completenessScore > 80 ? 'bg-[var(--sys-color-kr-activistSmokeGreen-base)]' : completenessScore > 50 ? 'bg-[var(--sys-color-stencilYellow-base)]' : 'bg-[var(--sys-color-kr-charcoalRed-base)]'}`}
+                            style={{ width: `${completenessScore}%` }}
+                        />
+                    </div>
+                    <span className="text-sm font-bold text-[var(--sys-color-paperWhite-base)]">{completenessScore}%</span>
+                </div>
                 {lastSaved && (
-                    <span className="text-[10px] text-gray-500 uppercase font-bold tracking-tighter">
+                    <span className="text-[10px] text-[var(--sys-color-worker-ash-base)] uppercase font-bold tracking-tighter">
                         Last Cloud Sync: {lastSaved}
                     </span>
                 )}
@@ -901,19 +959,20 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
                     <button 
                         onClick={handleSyncToCloud}
                         disabled={syncStatus === 'saving'}
-                        className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 transition-all shadow-lg ${
-                            syncStatus === 'saving' ? 'bg-gray-700 text-gray-400 cursor-wait' : 
-                            syncStatus === 'saved' ? 'bg-green-600/20 text-green-400 border border-green-500/50' :
-                            'bg-cyan-600 hover:bg-cyan-500 text-white hover:scale-105 active:scale-95'
+                        className={`px-6 py-3 font-bold text-sm uppercase tracking-wider flex items-center gap-2 transition-all shadow-[var(--sys-shadow-elevation2Placard)] hover:shadow-[var(--sys-shadow-elevation3HoverLift)] hover:-translate-y-1 ${
+                            syncStatus === 'saving' ? 'bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-concreteGrey-steps-0)] cursor-wait' : 
+                            syncStatus === 'saved' ? 'bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] text-[var(--sys-color-kr-activistSmokeGreen-steps-4)] border-2 border-[var(--sys-color-kr-activistSmokeGreen-base)]' :
+                            'bg-[var(--sys-color-solidarityRed-base)] text-[var(--sys-color-paperWhite-base)]'
                         }`}
+                        style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                     >
                         {syncStatus === 'saving' ? (
-                            <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                            <div className="w-4 h-4 border-2 border-[var(--sys-color-concreteGrey-steps-0)] border-t-transparent rounded-full animate-spin" />
                         ) : syncStatus === 'saved' ? (
                             <span>✓ Synced to Cloud</span>
                         ) : (
                             <>
-                                <ArrowPathIcon className="w-4 h-4" />
+                                <ArrowPathIcon className="w-5 h-5" />
                                 <span>Save to Cloud Profile</span>
                             </>
                         )}
@@ -922,62 +981,64 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
             </div>
         </div>
         
-        <div className="bg-gray-800 p-4 rounded-lg mb-8 sticky top-[73px] z-30 shadow-lg border border-cyan-900/50 backdrop-blur-md bg-gray-800/80 flex items-center justify-between gap-4">
+        <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] p-6 mb-10 sticky top-[73px] z-30 shadow-[var(--sys-shadow-elevation2Placard)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] flex items-center justify-between gap-4" style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
             <div className="flex items-center">
                 <input
                     id="needs-review"
                     type="checkbox"
                     checked={showNeedsReviewOnly}
                     onChange={(e) => setShowNeedsReviewOnly(e.target.checked)}
-                    className="h-5 w-5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500 bg-gray-900 cursor-pointer"
+                    className="h-6 w-6 border-2 border-[var(--sys-color-concreteGrey-steps-0)] text-[var(--sys-color-solidarityRed-base)] focus:ring-[var(--sys-color-solidarityRed-base)] bg-[var(--sys-color-charcoalBackground-steps-0)] cursor-pointer"
+                    style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                 />
-                <label htmlFor="needs-review" className="ml-3 block text-md font-medium text-gray-200 cursor-pointer">
+                <label htmlFor="needs-review" className="ml-4 block text-sm font-bold uppercase tracking-widest text-[var(--sys-color-paperWhite-base)] cursor-pointer">
                     Show only items needing review
                 </label>
             </div>
             
-            <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-400">
+            <div className="flex items-center gap-6">
+                <div className="text-sm font-bold uppercase tracking-widest text-[var(--sys-color-worker-ash-base)]">
                     {filteredAchievements.length} achievements | {filteredKSCs.length} STAR responses
                 </div>
                 {selectedIds.size > 0 && (
-                     <div className="h-6 w-px bg-gray-700 mx-2" />
+                     <div className="h-8 w-0.5 bg-[var(--sys-color-concreteGrey-steps-0)] mx-2" />
                 )}
                 {selectedIds.size > 0 && (
-                    <div className="flex items-center gap-2 animate-fade-in">
-                        <span className="text-sm font-bold text-cyan-400 whitespace-nowrap">{selectedIds.size} Selected</span>
-                        <div className="flex bg-gray-900 rounded-md p-1 border border-cyan-500/30">
+                    <div className="flex items-center gap-4 animate-fade-in">
+                        <span className="text-sm font-bold text-[var(--sys-color-stencilYellow-base)] uppercase tracking-widest whitespace-nowrap">{selectedIds.size} Selected</span>
+                        <div className="flex bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] p-1" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
                             <input 
                                 type="text" 
-                                placeholder="Add tag..." 
+                                placeholder="ADD TAG..." 
                                 value={bulkTagInput}
                                 onChange={(e) => setBulkTagInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleBulkTag()}
-                                className="bg-transparent border-none text-xs text-white focus:ring-0 w-24 px-2"
+                                className="bg-transparent border-none text-xs font-bold uppercase tracking-widest text-[var(--sys-color-paperWhite-base)] focus:ring-0 w-32 px-3 placeholder-[var(--sys-color-worker-ash-base)]"
                             />
                             <button 
                                 onClick={() => handleBulkTag()}
-                                className="text-cyan-400 hover:text-cyan-300 p-1"
+                                className="text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)] p-2 transition-colors"
                                 title="Apply Tag to Selected Entries & KSCs"
                             >
-                                <TagIcon className="w-4 h-4" />
+                                <TagIcon className="w-5 h-5" />
                             </button>
                             <button 
                                 onClick={handleAutoTag}
-                                className={`text-amber-400 hover:text-amber-300 px-2 py-1 ml-1 flex items-center gap-1 bg-amber-900/20 rounded border border-amber-500/20 hover:border-amber-500/50 transition-all ${isSuggesting ? 'animate-pulse opacity-50' : ''}`}
+                                className={`text-[var(--sys-color-stencilYellow-base)] hover:text-[var(--sys-color-charcoalBackground-base)] hover:bg-[var(--sys-color-stencilYellow-base)] px-3 py-1.5 ml-2 flex items-center gap-2 border-2 border-[var(--sys-color-stencilYellow-base)] transition-all ${isSuggesting ? 'animate-pulse opacity-50' : ''}`}
+                                style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                                 disabled={isSuggesting}
                             >
                                 {isSuggesting ? (
-                                    <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-[var(--sys-color-stencilYellow-base)] border-t-transparent rounded-full animate-spin" />
                                 ) : (
                                     <LightBulbIcon className="w-4 h-4" />
                                 )}
-                                <span className="text-[10px] font-bold uppercase tracking-wider">AI Suggest</span>
+                                <span className="text-xs font-bold uppercase tracking-wider">AI Suggest</span>
                             </button>
                         </div>
                         <button 
                             onClick={() => setSelectedIds(new Set())}
-                            className="text-xs text-gray-400 hover:text-white underline whitespace-nowrap"
+                            className="text-xs font-bold uppercase tracking-widest text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-solidarityRed-base)] underline whitespace-nowrap transition-colors"
                         >
                             Deselect All
                         </button>
@@ -988,105 +1049,108 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
 
         {/* Enhanced Strategic Analysis Panel */}
         {(suggestedTags.length > 0 || suggestedGaps.length > 0) && selectedIds.size > 0 && (
-            <div className="mb-10 overflow-hidden bg-gray-900/40 border border-amber-500/30 rounded-xl animate-slide-down backdrop-blur-xl shadow-2xl relative">
-                <div className="bg-amber-500/10 p-6 border-b border-amber-500/20">
-                    <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-amber-500/20 p-2 rounded-lg">
-                                <LightBulbIcon className="w-6 h-6 text-amber-400" />
+            <div className="mb-12 overflow-hidden bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-[var(--sys-color-stencilYellow-base)] animate-slide-down shadow-[var(--sys-shadow-elevation3HoverLift)] relative" style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+                <div className="bg-[var(--sys-color-stencilYellow-base)]/10 p-8 border-b-2 border-[var(--sys-color-stencilYellow-base)]">
+                    <div className="flex justify-between items-center mb-8">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-[var(--sys-color-stencilYellow-base)]/20 p-3" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
+                                <LightBulbIcon className="w-8 h-8 text-[var(--sys-color-stencilYellow-base)]" />
                             </div>
                             <div>
-                                <h4 className="text-xl font-bold text-white tracking-tight">Strategic Capability Analysis</h4>
-                                <p className="text-sm text-amber-200/60">AI insights mapped to {selectedIds.size} selected history items</p>
+                                <h4 className="text-3xl type-solidarityProtest text-[var(--sys-color-paperWhite-base)] uppercase tracking-tight">Strategic Capability Analysis</h4>
+                                <p className="text-base text-[var(--sys-color-worker-ash-base)] font-bold uppercase tracking-widest mt-1">AI insights mapped to {selectedIds.size} selected history items</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-6">
                             {selectedSuggestedTags.size > 0 && (
                                 <button 
                                     onClick={handleApplySelectedSuggestions}
-                                    className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg flex items-center gap-2 animate-fade-in"
+                                    className="px-6 py-3 bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] text-[var(--sys-color-kr-activistSmokeGreen-steps-4)] border-2 border-[var(--sys-color-kr-activistSmokeGreen-base)] hover:bg-[var(--sys-color-kr-activistSmokeGreen-base)] hover:text-[var(--sys-color-charcoalBackground-base)] text-sm font-bold uppercase tracking-wider transition-all shadow-[var(--sys-shadow-elevation2Placard)] flex items-center gap-2 animate-fade-in"
+                                    style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                                 >
-                                    <TagIcon className="w-4 h-4" /> Apply {selectedSuggestedTags.size} Selected Tags
+                                    <TagIcon className="w-5 h-5" /> Apply {selectedSuggestedTags.size} Selected Tags
                                 </button>
                             )}
                             <button 
                                 onClick={() => { setSuggestedTags([]); setSuggestedGaps([]); }} 
-                                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                                className="w-10 h-10 flex items-center justify-center border-2 border-[var(--sys-color-concreteGrey-steps-0)] hover:border-[var(--sys-color-solidarityRed-base)] hover:text-[var(--sys-color-solidarityRed-base)] text-[var(--sys-color-worker-ash-base)] transition-colors"
+                                style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                             >
-                                ×
+                                <span className="text-2xl leading-none">×</span>
                             </button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                         {/* Tags Section */}
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                                    <TagIcon className="w-4 h-4" /> Suggested Capability Tags
+                                <span className="text-sm font-bold text-[var(--sys-color-stencilYellow-base)] uppercase tracking-widest flex items-center gap-3">
+                                    <TagIcon className="w-5 h-5" /> Suggested Capability Tags
                                 </span>
                                 {suggestedTags.length > 0 && (
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-3">
                                         <button 
                                             onClick={() => setSelectedSuggestedTags(new Set(suggestedTags))} 
-                                            className="text-[10px] text-cyan-400 hover:text-cyan-300 font-bold"
+                                            className="text-xs text-[var(--sys-color-kr-activistSmokeGreen-base)] hover:text-[var(--sys-color-paperWhite-base)] font-bold uppercase tracking-wider"
                                         >
                                             Select All
                                         </button>
-                                        <span className="text-gray-600">|</span>
+                                        <span className="text-[var(--sys-color-concreteGrey-steps-0)]">|</span>
                                         <button 
                                             onClick={() => setSelectedSuggestedTags(new Set())} 
-                                            className="text-[10px] text-gray-500 hover:text-gray-300 font-bold"
+                                            className="text-xs text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)] font-bold uppercase tracking-wider"
                                         >
                                             Clear
                                         </button>
                                     </div>
                                 )}
                             </div>
-                            <div className="flex flex-wrap gap-2.5">
+                            <div className="flex flex-wrap gap-3">
                                 {suggestedTags.length > 0 ? (
                                     suggestedTags.map(tag => (
                                         <button 
                                             key={tag} 
                                             onClick={() => toggleSuggestedTag(tag)}
-                                            className={`group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+                                            className={`group relative inline-flex items-center gap-3 px-4 py-2 border-2 transition-all ${
                                                 selectedSuggestedTags.has(tag) 
-                                                ? 'bg-cyan-900/40 border-cyan-500/50 text-cyan-300 ring-1 ring-cyan-500/20' 
-                                                : 'bg-gray-800/40 border-gray-700/50 text-gray-400 hover:border-amber-500/30 hover:text-amber-200'
+                                                ? 'bg-[var(--sys-color-charcoalBackground-steps-3)] border-[var(--sys-color-stencilYellow-base)] text-[var(--sys-color-paperWhite-base)]' 
+                                                : 'bg-[var(--sys-color-charcoalBackground-steps-1)] border-[var(--sys-color-concreteGrey-steps-0)] text-[var(--sys-color-worker-ash-base)] hover:border-[var(--sys-color-stencilYellow-base)] hover:text-[var(--sys-color-paperWhite-base)]'
                                             }`}
+                                            style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                                         >
-                                            <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-colors ${
+                                            <div className={`w-4 h-4 border-2 flex items-center justify-center transition-colors ${
                                                 selectedSuggestedTags.has(tag) 
-                                                ? 'bg-cyan-500 border-cyan-500' 
-                                                : 'border-gray-600 group-hover:border-amber-500/50'
-                                            }`}>
-                                                {selectedSuggestedTags.has(tag) && <span className="text-[10px] text-white font-bold leading-none">✓</span>}
+                                                ? 'bg-[var(--sys-color-stencilYellow-base)] border-[var(--sys-color-stencilYellow-base)]' 
+                                                : 'border-[var(--sys-color-concreteGrey-steps-0)] group-hover:border-[var(--sys-color-stencilYellow-base)]'
+                                            }`} style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
+                                                {selectedSuggestedTags.has(tag) && <span className="text-xs text-[var(--sys-color-charcoalBackground-base)] font-bold leading-none">✓</span>}
                                             </div>
-                                            <span className="text-sm font-medium">{tag}</span>
+                                            <span className="text-sm font-bold uppercase tracking-widest">{tag}</span>
                                         </button>
                                     ))
                                 ) : (
-                                    <p className="text-sm text-gray-500 italic">No further tags suggested.</p>
+                                    <p className="text-base type-melancholyLonging text-[var(--sys-color-worker-ash-base)] italic">No further tags suggested.</p>
                                 )}
                             </div>
                         </div>
 
                         {/* Skills Gaps Section */}
-                        <div className="space-y-4">
-                            <span className="text-xs font-bold text-red-400 uppercase tracking-widest flex items-center gap-2">
-                                <ExclamationTriangleIcon className="w-4 h-4" /> Strategic Skills Gaps
+                        <div className="space-y-6">
+                            <span className="text-sm font-bold text-[var(--sys-color-solidarityRed-base)] uppercase tracking-widest flex items-center gap-3">
+                                <ExclamationTriangleIcon className="w-5 h-5" /> Strategic Skills Gaps
                             </span>
-                            <div className="bg-red-900/10 border border-red-500/20 rounded-xl overflow-hidden divide-y divide-red-500/10">
+                            <div className="bg-[var(--sys-color-kr-charcoalRed-steps-0)] border-2 border-[var(--sys-color-solidarityRed-base)] overflow-hidden divide-y-2 divide-[var(--sys-color-solidarityRed-base)]" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}>
                                 {suggestedGaps.length > 0 ? (
                                     suggestedGaps.map((gap, i) => (
-                                        <div key={i} className="p-3.5 flex items-start gap-3 hover:bg-red-500/5 transition-colors group">
-                                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-red-500/50 flex-shrink-0 group-hover:bg-red-500 transition-colors" />
-                                            <p className="text-sm text-red-200/80 leading-relaxed font-medium">{gap}</p>
+                                        <div key={i} className="p-4 flex items-start gap-4 hover:bg-[var(--sys-color-kr-charcoalRed-steps-1)] transition-colors group">
+                                            <div className="mt-1.5 w-2 h-2 bg-[var(--sys-color-solidarityRed-base)] flex-shrink-0" style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }} />
+                                            <p className="text-base type-melancholyLonging text-[var(--sys-color-paperWhite-base)] leading-relaxed">{gap}</p>
                                         </div>
                                     ))
                                 ) : (
                                     <div className="p-8 text-center">
-                                        <p className="text-sm text-green-400 font-bold flex items-center justify-center gap-2">
+                                        <p className="text-base font-bold text-[var(--sys-color-kr-activistSmokeGreen-base)] uppercase tracking-widest flex items-center justify-center gap-3">
                                             ✓ No major capability gaps identified!
                                         </p>
                                     </div>
@@ -1098,9 +1162,9 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
             </div>
         )}
 
-        <section className="mb-12">
-            <h3 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">
-                <ArrowPathIcon className="w-6 h-6" /> Work Experience & Achievements
+        <section className="mb-16">
+            <h3 className="text-3xl type-solidarityProtest text-[var(--sys-color-paperWhite-base)] mb-8 uppercase tracking-tight flex items-center gap-3">
+                <ArrowPathIcon className="w-8 h-8 text-[var(--sys-color-solidarityRed-base)]" /> Work Experience & Achievements
             </h3>
             <div className="space-y-8">
                 {entriesWithFilteredAchievements.length > 0 ? (
@@ -1116,22 +1180,23 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
                         />
                     ))
                 ) : (
-                    <div className="p-8 text-center bg-gray-800 rounded-lg border border-dashed border-gray-600">
-                        <p className="text-gray-500 italic">No work experience entries matching your current filter.</p>
+                    <div className="p-12 text-center bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-dashed border-[var(--sys-color-concreteGrey-steps-0)]" style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+                        <p className="text-lg type-melancholyLonging text-[var(--sys-color-worker-ash-base)] italic">No work experience entries matching your current filter.</p>
                     </div>
                 )}
             </div>
         </section>
 
-        <section className="mb-12">
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-cyan-400 flex items-center gap-2">
-                    <LightBulbIcon className="w-6 h-6" /> Key Selection Criteria (STAR Method)
+        <section className="mb-16">
+            <div className="flex justify-between items-center mb-8">
+                <h3 className="text-3xl type-solidarityProtest text-[var(--sys-color-paperWhite-base)] uppercase tracking-tight flex items-center gap-3">
+                    <LightBulbIcon className="w-8 h-8 text-[var(--sys-color-stencilYellow-base)]" /> Key Selection Criteria (STAR Method)
                 </h3>
                 {filteredKSCs.length > 0 && (
                     <button
                         onClick={handleMarkAllKSCAsValidated}
-                        className="text-xs px-3 py-1.5 bg-cyan-900/40 text-cyan-300 border border-cyan-500/30 rounded hover:bg-cyan-800/60 transition-colors flex items-center gap-2"
+                        className="text-xs px-4 py-2 bg-[var(--sys-color-charcoalBackground-steps-3)] text-[var(--sys-color-paperWhite-base)] border-2 border-[var(--sys-color-concreteGrey-steps-0)] hover:border-[var(--sys-color-paperWhite-base)] font-bold uppercase tracking-wider transition-colors flex items-center gap-2"
+                        style={{ borderRadius: 'var(--sys-shape-blockRiot01)' }}
                     >
                         Mark All Shown as Validated
                     </button>
@@ -1151,21 +1216,21 @@ export const ValidationDashboard: React.FC<ValidationDashboardProps> = ({ data, 
                         />
                     ))
                 ) : (
-                    <div className="p-8 text-center bg-gray-800 rounded-lg border border-dashed border-gray-600">
-                        <p className="text-gray-500 italic">No KSC responses matching your current filter.</p>
+                    <div className="p-12 text-center bg-[var(--sys-color-charcoalBackground-steps-0)] border-2 border-dashed border-[var(--sys-color-concreteGrey-steps-0)]" style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+                        <p className="text-lg type-melancholyLonging text-[var(--sys-color-worker-ash-base)] italic">No KSC responses matching your current filter.</p>
                     </div>
                 )}
             </div>
         </section>
 
         {/* API Preview Section */}
-        <div className="mt-12">
-            <h2 className="text-3xl font-bold mb-6 text-cyan-300">3. API Output Preview</h2>
-            <p className="text-gray-400 mb-4">
+        <div className="mt-16 pt-16 border-t-2 border-[var(--sys-color-concreteGrey-steps-0)]">
+            <h2 className="text-4xl type-solidarityProtest text-[var(--sys-color-paperWhite-base)] mb-6 uppercase tracking-tighter">3. API Output <span className="text-[var(--sys-color-solidarityRed-base)]">Preview</span></h2>
+            <p className="type-melancholyLonging text-[var(--sys-color-worker-ash-base)] text-lg mb-8">
                 This is the structured JSON data that would be available via the secure API for the "CareerCopilot" tool to consume.
             </p>
-            <div className="bg-gray-900 rounded-lg p-4 h-96 overflow-auto border border-gray-700">
-                <pre className="text-sm text-green-300">{JSON.stringify(data, null, 2)}</pre>
+            <div className="bg-[var(--sys-color-charcoalBackground-steps-0)] p-6 h-96 overflow-auto border-2 border-[var(--sys-color-concreteGrey-steps-0)]" style={{ borderRadius: 'var(--sys-shape-blockRiot02)' }}>
+                <pre className="text-sm text-[var(--sys-color-kr-activistSmokeGreen-base)] font-mono">{JSON.stringify(data, null, 2)}</pre>
             </div>
         </div>
     </div>

@@ -100,6 +100,15 @@ export interface KSCResponse {
   };
 }
 
+export interface SavedDocument {
+  id: string;
+  jobTitle: string;
+  companyName: string;
+  dateSaved: string;
+  coverLetter: string;
+  tailoredSummary: string;
+}
+
 export interface CareerDatabase {
   Personal_Information: PersonalInformation;
   Career_Profile: CareerProfile;
@@ -107,6 +116,7 @@ export interface CareerDatabase {
   Career_Entries: CareerEntry[];
   Structured_Achievements: StructuredAchievement[];
   KSC_Responses: KSCResponse[];
+  Saved_Documents?: SavedDocument[];
 }
 
 export interface JobOpportunity {
@@ -150,6 +160,7 @@ export interface DocumentAudit {
 export interface MatchAnalysis {
   Overall_Fit_Score: number;
   Skill_Gaps: SkillMatch[];
+  Headline_Suggestion?: string;
   Tailored_Summary: string;
   Recommended_Achievement_IDs: string[];
   Cover_Letter_Draft: string;

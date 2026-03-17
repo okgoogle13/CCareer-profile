@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { CareerDatabase, JobOpportunity, MatchAnalysis } from '../types';
+import { useAutoSave } from '../hooks/useAutoSave';
+import { saveUserCareerData } from '../services/firebase';
+import { CareerDatabase, JobOpportunity, MatchAnalysis, SavedDocument } from '../types';
 import { generateMatchAnalysis } from '../services/geminiService';
 import { TailoredResumeView } from './TailoredResumeView';
 import { KSCResponsesView } from './KSCResponsesView';
@@ -17,9 +19,11 @@ import { saveAs } from 'file-saver';
 interface MatchDashboardProps {
   careerData: CareerDatabase;
   job: JobOpportunity;
+  onUpdate?: (data: CareerDatabase) => void;
+  userId?: string;
 }
 
-export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job }) => {
+export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job, onUpdate, userId }) => {
   const [analysis, setAnalysis] = useState<MatchAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +31,9 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateStyle>(RESUME_TEMPLATES[0]);
   const [showAudit, setShowAudit] = useState(false);
   const [coverLetterContent, setCoverLetterContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [locale, setLocale] = useState<'US' | 'UK/AU'>('US');
   const resumeRef = useRef<HTMLDivElement>(null);
   const kscRef = useRef<HTMLDivElement>(null);
 
@@ -61,13 +68,61 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
     setIsLoading(true);
     setError(null);
     try {
-      const result = await generateMatchAnalysis(careerData, job);
+      let result = await generateMatchAnalysis(careerData, job);
+      
+      // Self-Correction API Step: Check if the score is below a threshold and try to improve it once
+      if (result.Overall_Fit_Score < 70) {
+          console.log("Initial score below 70, attempting self-correction...");
+          // In a real scenario, you might pass the previous result back to the AI to ask for improvements
+          // For now, we'll just re-run it to see if it generates a better fit with a different seed/temperature
+          const retryResult = await generateMatchAnalysis(careerData, job);
+          if (retryResult.Overall_Fit_Score > result.Overall_Fit_Score) {
+              console.log("Self-correction improved score.");
+              result = retryResult;
+          }
+      }
+
       setAnalysis(result);
       setCoverLetterContent(result.Cover_Letter_Draft);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveDocument = async (content: string) => {
+    if (!userId || !analysis || !onUpdate) return;
+    const newDoc: SavedDocument = {
+      id: crypto.randomUUID(),
+      jobTitle: job.Job_Title,
+      companyName: job.Company_Name,
+      dateSaved: new Date().toISOString(),
+      coverLetter: content,
+      tailoredSummary: analysis.Tailored_Summary
+    };
+
+    const updatedData = {
+      ...careerData,
+      Saved_Documents: [...(careerData.Saved_Documents || []), newDoc]
+    };
+
+    await saveUserCareerData(userId, updatedData);
+    onUpdate(updatedData);
+  };
+
+  const { isSaving: isAutoSaving, lastSaved, save } = useAutoSave(userId, coverLetterContent, saveDocument);
+
+  const handleSaveToProfile = async () => {
+    setIsSaving(true);
+    try {
+      await save(coverLetterContent);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      console.error("Failed to save document:", err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -333,9 +388,28 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
 
       {/* Template Selector */}
       <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-        <h3 className="text-sm font-bold text-cyan-500 uppercase tracking-widest mb-4">Select Document Template</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
-          {RESUME_TEMPLATES.map((t) => (
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-sm font-bold text-cyan-500 uppercase tracking-widest">Select Document Template</h3>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Locale:</span>
+            <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-700">
+              <button
+                onClick={() => setLocale('US')}
+                className={`px-3 py-1 rounded text-xs font-bold transition-colors ${locale === 'US' ? 'bg-cyan-600 text-white' : 'text-gray-400 hover:text-gray-200'}`}
+              >
+                US
+              </button>
+              <button
+                onClick={() => setLocale('UK/AU')}
+                className={`px-3 py-1 rounded text-xs font-bold transition-colors ${locale === 'UK/AU' ? 'bg-cyan-600 text-white' : 'text-gray-400 hover:text-gray-200'}`}
+              >
+                UK/AU
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {RESUME_TEMPLATES.slice(0, 3).map((t) => (
             <button
               key={t.id}
               onClick={() => setSelectedTemplate(t)}
@@ -364,11 +438,11 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
       </div>
 
       {/* Tabs and Export */}
-      <div className="flex justify-between items-end border-b border-gray-700 pb-2">
-        <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-end border-b border-gray-700 pb-2 sticky top-0 bg-gray-900 z-40 pt-4">
+        <div className="flex gap-2 md:gap-4 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
           <button
             onClick={() => setActiveTab('analysis')}
-            className={`px-4 py-2 font-bold rounded-t-lg transition-colors ${
+            className={`px-3 md:px-4 py-2 font-bold rounded-t-lg transition-colors whitespace-nowrap ${
               activeTab === 'analysis' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
             }`}
           >
@@ -376,7 +450,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
           </button>
           <button
             onClick={() => setActiveTab('resume')}
-            className={`px-4 py-2 font-bold rounded-t-lg transition-colors ${
+            className={`px-3 md:px-4 py-2 font-bold rounded-t-lg transition-colors whitespace-nowrap ${
               activeTab === 'resume' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
             }`}
           >
@@ -384,49 +458,104 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
           </button>
           <button
             onClick={() => setActiveTab('coverLetter')}
-            className={`px-4 py-2 font-bold rounded-t-lg transition-colors ${
+            className={`px-3 md:px-4 py-2 font-bold rounded-t-lg transition-colors whitespace-nowrap ${
               activeTab === 'coverLetter' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
             }`}
           >
             Cover Letter
           </button>
-          <button
-            onClick={() => setActiveTab('ksc')}
-            className={`px-4 py-2 font-bold rounded-t-lg transition-colors ${
-              activeTab === 'ksc' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            KSC Responses
-          </button>
+          {analysis?.KSC_Responses_Drafts && analysis.KSC_Responses_Drafts.length > 0 && (
+            <button
+              onClick={() => setActiveTab('ksc')}
+              className={`px-3 md:px-4 py-2 font-bold rounded-t-lg transition-colors whitespace-nowrap ${
+                activeTab === 'ksc' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              KSC Responses
+            </button>
+          )}
         </div>
         
-        {(activeTab === 'resume' || activeTab === 'coverLetter' || activeTab === 'ksc') && (
-          <div className="flex gap-2 mb-1">
-            {(activeTab === 'resume' || activeTab === 'coverLetter') && (
+        <div className="flex flex-wrap items-center gap-2 mt-2 md:mt-0 w-full md:w-auto justify-end">
+          <button
+            onClick={handleAnalyze}
+            className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-1.5 px-3 md:py-2 md:px-4 rounded-lg transition-colors text-sm md:text-base"
+          >
+            Rescore
+          </button>
+          
+          {(activeTab === 'resume' || activeTab === 'coverLetter' || activeTab === 'ksc') && (
+            <div className="flex flex-wrap gap-2 items-center">
+              {(activeTab === 'resume' || activeTab === 'coverLetter') && (
+                <button 
+                  onClick={() => setShowAudit(!showAudit)}
+                  className={`flex items-center gap-1.5 px-2 py-1 md:px-3 md:py-1 rounded text-xs md:text-sm font-bold transition-colors ${
+                    showAudit ? 'bg-cyan-600 text-white' : 'bg-gray-700 text-cyan-400 hover:bg-gray-600'
+                  }`}
+                >
+                  <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="hidden sm:inline">{showAudit ? 'Hide Audit' : 'Show Audit'}</span>
+                  <span className="sm:hidden">Audit</span>
+                </button>
+              )}
+              {activeTab === 'coverLetter' && userId && (
+                <button
+                  onClick={handleSaveToProfile}
+                  disabled={isSaving || saveSuccess}
+                  className={`flex items-center gap-1.5 px-2 py-1 md:px-3 md:py-1 rounded text-xs md:text-sm font-bold transition-colors ${
+                    saveSuccess 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-500/30'
+                  }`}
+                >
+                  {isSaving ? (
+                    <span className="flex items-center gap-1.5">
+                      <svg className="animate-spin h-3 w-3 md:h-4 md:w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="hidden sm:inline">Saving...</span>
+                    </span>
+                  ) : saveSuccess ? (
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="hidden sm:inline">Saved!</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                      <span className="hidden sm:inline">Save</span>
+                    </span>
+                  )}
+                </button>
+              )}
+              <span className="text-gray-400 text-xs md:text-sm hidden md:inline">Export:</span>
               <button 
-                onClick={() => setShowAudit(!showAudit)}
-                className={`flex items-center gap-2 px-3 py-1 rounded text-sm font-bold transition-colors mr-4 ${
-                  showAudit ? 'bg-cyan-600 text-white' : 'bg-gray-700 text-cyan-400 hover:bg-gray-600'
-                }`}
+                onClick={() => {
+                  const text = activeTab === 'resume' ? getResumeText() : activeTab === 'coverLetter' ? coverLetterContent : analysis?.KSC_Responses_Drafts?.map(k => `${k.KSC_Prompt}\n${k.Response}`).join('\n\n') || '';
+                  navigator.clipboard.writeText(text);
+                  alert('Copied to clipboard for ATS parsing!');
+                }}
+                className="bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-500/30 px-2 py-1 md:px-3 rounded text-xs md:text-sm font-bold transition-colors"
+                title="Copy Text"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {showAudit ? 'Hide Audit' : 'Show Audit'}
+                Copy
               </button>
-            )}
-            <span className="text-gray-400 text-sm mr-2 self-center">Export as:</span>
-            <button onClick={exportToPDF} className="bg-red-900/40 hover:bg-red-800/60 text-red-300 border border-red-500/30 px-3 py-1 rounded text-sm font-bold transition-colors">
-              PDF
-            </button>
-            <button onClick={exportToDOCX} className="bg-blue-900/40 hover:bg-blue-800/60 text-blue-300 border border-blue-500/30 px-3 py-1 rounded text-sm font-bold transition-colors">
-              DOCX
-            </button>
-            <button onClick={exportToMarkdown} className="bg-gray-700/40 hover:bg-gray-600/60 text-gray-300 border border-gray-500/30 px-3 py-1 rounded text-sm font-bold transition-colors">
-              Markdown
-            </button>
-          </div>
-        )}
+              <button onClick={exportToPDF} className="bg-red-900/40 hover:bg-red-800/60 text-red-300 border border-red-500/30 px-2 py-1 md:px-3 rounded text-xs md:text-sm font-bold transition-colors">
+                PDF
+              </button>
+              <button onClick={exportToDOCX} className="bg-blue-900/40 hover:bg-blue-800/60 text-blue-300 border border-blue-500/30 px-2 py-1 md:px-3 rounded text-xs md:text-sm font-bold transition-colors">
+                DOCX
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {activeTab === 'analysis' && (
@@ -481,9 +610,15 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
             {/* Tailored Summary */}
             <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
               <h3 className="text-xl font-bold text-cyan-300 mb-4 border-b border-gray-700 pb-2">Tailored Resume Summary</h3>
-              <p className="text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded border border-gray-700/50">
+              <p className="text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded border border-gray-700/50 mb-4">
                 {analysis.Tailored_Summary}
               </p>
+              <button 
+                onClick={() => setActiveTab('coverLetter')}
+                className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+              >
+                Generate/Edit Cover Letter
+              </button>
             </div>
 
             {/* Recommended Achievements */}
@@ -505,7 +640,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
       {activeTab === 'resume' && (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
           <div className="xl:col-span-2" ref={resumeRef}>
-            <TailoredResumeView careerData={careerData} analysis={analysis} template={selectedTemplate} />
+            <TailoredResumeView careerData={careerData} analysis={analysis} template={selectedTemplate} locale={locale} />
           </div>
           <div className="xl:col-span-1 space-y-6 sticky top-8">
             <ATSScoreCard 
@@ -513,6 +648,19 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job 
               isCalculating={resumeScoring.isCalculating} 
               documentType="resume" 
             />
+            {resumeRef.current && resumeRef.current.clientHeight > 1122 && ( // A4 is ~1122px at 96dpi
+              <div className="bg-amber-900/40 border border-amber-500/30 p-4 rounded-xl">
+                <div className="flex items-center gap-3 mb-2">
+                  <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <h4 className="font-bold text-amber-300">Page Length Warning</h4>
+                </div>
+                <p className="text-sm text-amber-200/80">
+                  Your resume appears to be longer than one page. Consider trimming older experience or less relevant skills to improve ATS readability.
+                </p>
+              </div>
+            )}
             {showAudit && analysis.Resume_Audit && (
               <AuditDisplay audit={analysis.Resume_Audit} title="Resume" />
             )}

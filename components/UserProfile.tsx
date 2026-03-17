@@ -1,17 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { CareerDatabase, EntryType } from '../types';
 import { DocumentTextIcon } from './icons/DocumentTextIcon';
 import { ArrowPathIcon } from './icons/ArrowPathIcon';
+import { deleteUserCareerData } from '../services/firebase';
 
 interface UserProfileProps {
   user: User;
   data: CareerDatabase | null;
   onClose: () => void;
+  onDataDeleted?: () => void;
 }
 
-export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose }) => {
+export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose, onDataDeleted }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
   const displayName = user.displayName || user.email;
   const photoURL = user.photoURL;
   const downloadJSON = () => {
@@ -132,6 +135,24 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose })
     URL.revokeObjectURL(url);
   };
 
+  const handleDeleteData = async () => {
+    if (window.confirm("Are you sure you want to delete ALL your career data? This action cannot be undone.")) {
+      setIsDeleting(true);
+      try {
+        await deleteUserCareerData(user.uid);
+        if (onDataDeleted) {
+          onDataDeleted();
+        }
+        onClose();
+      } catch (error) {
+        console.error("Error deleting data:", error);
+        alert("Failed to delete data. Please try again.");
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+
   const stats = {
     entries: data?.Career_Entries.length || 0,
     achievements: data?.Structured_Achievements.length || 0,
@@ -202,6 +223,16 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose })
             >
               <ArrowPathIcon className="w-4 h-4" />
               <span>Export Raw JSON Database</span>
+            </button>
+            <button 
+              onClick={handleDeleteData}
+              disabled={isDeleting || !data}
+              className="w-full py-3 bg-red-900/40 hover:bg-red-800/60 disabled:bg-gray-800 disabled:text-gray-600 text-red-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 border border-red-500/30 hover:border-red-500/50 mt-4"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>{isDeleting ? 'Deleting...' : 'Delete All Data'}</span>
             </button>
           </div>
           

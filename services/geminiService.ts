@@ -355,8 +355,9 @@ export const analyzeFitAndGenerateDrafts = async (
       1. Calculate an Overall_Fit_Score (0-100) based on how well the user's skills and experience match the job requirements.
       2. Identify Skill_Gaps. For each required hard/soft skill in the job posting, determine the Match_Level ("Strong", "Partial", "Missing") based on the user's Master_Skills_Inventory and Career_Entries. Provide brief Evidence from the user's profile.
       3. Write a Tailored_Summary (3-4 sentences) that the user can put at the top of their resume, specifically highlighting their most relevant experience for this exact role.
-      4. Recommend 3-5 Achievement_IDs from the user's Structured_Achievements that are most relevant to this job's Key_Responsibilities.
-      5. Draft a highly tailored Cover_Letter (3-4 paragraphs) that connects the user's specific achievements and values to the company's needs and culture keywords.
+      4. Provide a Headline_Suggestion (e.g., "Senior Software Engineer | React Specialist") that positions the candidate perfectly for this role.
+      5. Recommend 3-5 Achievement_IDs from the user's Structured_Achievements that are most relevant to this job's Key_Responsibilities.
+      6. Draft a highly tailored Cover_Letter (3-4 paragraphs) that connects the user's specific achievements and values to the company's needs and culture keywords.
       
       Return the result as a JSON object matching the requested schema.
     `;
@@ -377,11 +378,12 @@ export const analyzeFitAndGenerateDrafts = async (
                     required: ["Skill", "Match_Level", "Evidence"]
                 }
             },
+            Headline_Suggestion: { type: Type.STRING },
             Tailored_Summary: { type: Type.STRING },
             Recommended_Achievement_IDs: { type: Type.ARRAY, items: { type: Type.STRING } },
             Cover_Letter_Draft: { type: Type.STRING }
         },
-        required: ["Overall_Fit_Score", "Skill_Gaps", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft"]
+        required: ["Overall_Fit_Score", "Skill_Gaps", "Headline_Suggestion", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft"]
     };
 
     const response = await ai.models.generateContent({
@@ -460,6 +462,7 @@ export const extractJobOpportunity = async (inputType: 'url' | 'text', content: 
         config: {
             responseMimeType: "application/json",
             responseSchema: schema,
+            temperature: 0.1,
             tools: inputType === 'url' ? [{ urlContext: {} }] : undefined
         }
     });
@@ -470,6 +473,24 @@ export const extractJobOpportunity = async (inputType: 'url' | 'text', content: 
 };
 
 export const generateMatchAnalysis = async (careerData: CareerDatabase, job: JobOpportunity): Promise<MatchAnalysis> => {
+    // Load static knowledge reference files (simulated for now, could be fetched from a server or imported)
+    const communityServicesTaxonomy = `
+      Community Services Taxonomy:
+      - Direct Practice: Case Management, Counseling, Crisis Intervention, Advocacy.
+      - Program Management: Program Design, Evaluation, Grant Writing, Budgeting.
+      - Community Development: Capacity Building, Community Engagement, Partnership Brokering.
+      - Policy & Research: Policy Analysis, Social Research, Submission Writing.
+      - Leadership: Clinical Supervision, Team Leadership, Strategic Planning.
+    `;
+
+    const starRules = `
+      STAR Method Rules:
+      - Situation: Set the context (who, what, where, when). Keep it brief (10-15%).
+      - Task: Describe the specific challenge or goal. What needed to be done? (10-15%).
+      - Action: Detail the specific actions YOU took. Use "I", not "we". Focus on skills and methods (60-70%).
+      - Result: Quantify the outcome. What was achieved? What did you learn? (10-15%).
+    `;
+
     const prompt = `
       You are an elite executive career coach and expert resume writer who specializes in authentic, high-impact job applications.
       Your task is to analyze the candidate's Career Database against the target Job Opportunity and provide a highly tailored, authentic match analysis.
@@ -482,11 +503,16 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
       Candidate Career Database:
       ${JSON.stringify(careerData)}
       
+      Knowledge Reference Files:
+      ${communityServicesTaxonomy}
+      ${starRules}
+
       Perform the following:
       1. Calculate an Overall_Fit_Score (0-100) based on skill overlap and experience.
       2. Perform a Skill Gap Analysis. For each Required_Skill and Preferred_Skill in the job, determine if the candidate has a "Strong", "Partial", or "Missing" match. Provide brief evidence if Strong/Partial.
       3. Write a highly tailored Professional Summary (3-4 sentences) for the top of a resume targeting this specific role. 
          - VALUE PROPOSITION: The Tailored Summary should be a strong 2-3 sentence hook that aligns the user's top 2 strengths directly with the core problem the job is trying to solve.
+         - HEADLINE: Provide a short, punchy Resume Headline (e.g., "Senior Software Engineer | React Specialist") that positions the candidate perfectly for this role.
       4. Select the top 5-7 most relevant Achievement_IDs from the candidate's Structured_Achievements that should be highlighted in the resume. Choose achievements that demonstrate impact related to the job's core responsibilities.
       5. Draft a compelling, modern Cover Letter tailored to this company and role, drawing specific metrics and examples from the candidate's achievements.
       6. Draft 2-3 Key Selection Criteria (KSC) Responses in STAR format (Situation, Task, Action, Result) based on the most critical requirements of the job. Each response should be 150-200 words.
@@ -532,6 +558,7 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
                     required: ["Skill", "Match_Level", "Evidence"]
                 }
             },
+            Headline_Suggestion: { type: Type.STRING },
             Tailored_Summary: { type: Type.STRING },
             Recommended_Achievement_IDs: { type: Type.ARRAY, items: { type: Type.STRING } },
             Cover_Letter_Draft: { type: Type.STRING },
@@ -591,7 +618,7 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
                 required: ["overallScore", "scanSimulation", "violations", "recommendations"]
             }
         },
-        required: ["Overall_Fit_Score", "Skill_Gaps", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft", "KSC_Responses_Drafts", "Resume_Audit", "Cover_Letter_Audit"]
+        required: ["Overall_Fit_Score", "Skill_Gaps", "Headline_Suggestion", "Tailored_Summary", "Recommended_Achievement_IDs", "Cover_Letter_Draft", "KSC_Responses_Drafts", "Resume_Audit", "Cover_Letter_Audit"]
     };
 
     const response = await ai.models.generateContent({
@@ -600,6 +627,7 @@ export const generateMatchAnalysis = async (careerData: CareerDatabase, job: Job
         config: {
             responseMimeType: "application/json",
             responseSchema: schema,
+            temperature: 0.7,
             thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
             tools: [{ googleSearch: {} }]
         }
