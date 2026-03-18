@@ -1,14 +1,17 @@
 import React from "react";
 import { motion } from "motion/react";
 import { Briefcase, User, History, LogOut, Library } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type Props = {
-  activeTab: 'workspace' | 'profile' | 'past' | 'components';
-  onTabChange: (tab: 'workspace' | 'profile' | 'past' | 'components') => void;
   onLogout: () => void;
 };
 
-export function SidebarNav({ activeTab, onTabChange, onLogout }: Props) {
+export function SidebarNav({ onLogout }: Props) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activePath = location.pathname;
+
   return (
     <nav className="w-80 bg-[var(--sys-color-charcoalBackground-steps-1)] border-r-2 border-[var(--sys-color-concreteGrey-steps-0)] h-screen fixed left-0 top-0 flex flex-col z-50">
       <div className="p-8 border-b-2 border-[var(--sys-color-concreteGrey-steps-0)]">
@@ -23,10 +26,10 @@ export function SidebarNav({ activeTab, onTabChange, onLogout }: Props) {
       </div>
       
       <div className="flex-1 p-6 space-y-4 overflow-y-auto">
-        <NavItem icon={<Briefcase size={20} />} label="Workspace" active={activeTab === 'workspace'} onClick={() => onTabChange('workspace')} />
-        <NavItem icon={<User size={20} />} label="Master Profile" active={activeTab === 'profile'} onClick={() => onTabChange('profile')} />
-        <NavItem icon={<History size={20} />} label="Past Applications" active={activeTab === 'past'} onClick={() => onTabChange('past')} />
-        <NavItem icon={<Library size={20} />} label="Component Library" active={activeTab === 'components'} onClick={() => onTabChange('components')} />
+        <NavItem icon={<Briefcase size={20} />} label="Workspace" active={activePath === '/workspace'} onClick={() => navigate('/workspace')} />
+        <NavItem icon={<User size={20} />} label="Master Profile" active={activePath === '/profile'} onClick={() => navigate('/profile')} />
+        <NavItem icon={<History size={20} />} label="Past Applications" active={activePath === '/past'} onClick={() => navigate('/past')} />
+        <NavItem icon={<Library size={20} />} label="Component Library" active={activePath === '/components'} onClick={() => navigate('/components')} />
       </div>
 
       <div className="p-6 border-t-2 border-[var(--sys-color-concreteGrey-steps-0)]">

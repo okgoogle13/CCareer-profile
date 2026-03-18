@@ -1,46 +1,72 @@
-# CareerCopilot Chrome Extension
+# CareerCopilot
 
-This project is a Chrome Extension that helps you tailor your resume and cover letter to job descriptions using AI.
+CareerCopilot is a powerful, AI-driven career management and application tailoring platform. 
 
-## Installation
+**First and foremost, this is a React web application** designed for optimal usage on **desktop screens or large laptop screens** using modern browsers like **Google Chrome** or **Comet**.
 
-1.  **Build the extension:**
-    Run `npm run build` to generate the `dist` folder.
+While it may contain extension-like capabilities for page extraction, its primary home is a full-screen, immersive web experience built with React, TypeScript, and Vite.
 
-2.  **Load in Chrome:**
-    -   Open Chrome and navigate to `chrome://extensions/`.
-    -   Enable "Developer mode" in the top right corner.
-    -   Click "Load unpacked".
-    -   Select the `dist` folder in this project directory.
+## Architecture & Tech Stack
 
-## Configuration
+The application follows modern norms and best practices for a decoupled frontend/backend architecture:
 
-### Firebase Authentication & Database
-To use the authentication and database features, you must configure Firebase for your extension:
+### Frontend (Client)
+- **Framework:** React 18+ with TypeScript
+- **Build Tool:** Vite for lightning-fast HMR and optimized production builds
+- **Routing:** Standard SPA routing (e.g., `react-router-dom`) to manage distinct views (Workspace, Master Profile, Past Applications, Component Library) cleanly and predictably.
+- **Styling:** Tailwind CSS with a custom "protest street art" design system, utilizing CSS variables for dynamic theming and `motion/react` for fluid, spring-physics animations.
 
-1.  Go to the [Firebase Console](https://console.firebase.google.com/).
-2.  Create a project or select your existing one.
-3.  Copy the configuration values into a `.env` file in the root directory:
-    ```env
-    FIREBASE_API_KEY=your_api_key
-    FIREBASE_AUTH_DOMAIN=your_auth_domain
-    FIREBASE_PROJECT_ID=your_project_id
-    FIREBASE_STORAGE_BUCKET=your_storage_bucket
-    FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-    FIREBASE_APP_ID=your_app_id
-    GEMINI_API_KEY=your_gemini_api_key
-    ```
-4.  **Important:** In Firebase Authentication settings, ensure Google is enabled as a sign-in provider.
-    -   You may need to add your Chrome Extension ID to the authorized domains in Firebase Authentication settings.
+### Backend (API & AI)
+- **AI Orchestration:** **Python Genkit** backend. The backend is responsible for securely handling complex LLM reasoning, document parsing, and criteria extraction flows using Google's Genkit framework for Python.
+- **Database & Auth:** Firebase (Firestore & Firebase Auth) for secure, real-time user data synchronization and identity management.
 
-### Gemini API
-Ensure you have a valid Gemini API key in your `.env` file as `GEMINI_API_KEY`.
+## Getting Started (Frontend Development)
 
-## Usage
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
 
-1.  Click the extension icon in the Chrome toolbar.
-2.  Sign in with Google.
-3.  Upload your career documents (Resume, Project Docs, etc.) in the "Career Database" tab.
-4.  Navigate to a job posting page (e.g., LinkedIn, Indeed).
-5.  Go to the "Extract Job Opportunity" tab and click "Extract from Page".
-6.  Go to the "Match & Tailor" tab to generate tailored content.
+### Installation
+
+1. **Clone and install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Environment Configuration:**
+   Create a `.env` file in the root directory with your Firebase and API configurations:
+   ```env
+   VITE_FIREBASE_API_KEY=your_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   
+   # Note: In a production environment with a Python Genkit backend, 
+   # sensitive API keys (like GEMINI_API_KEY) should remain securely on the server.
+   ```
+
+3. **Start the Development Server:**
+   ```bash
+   npm run dev
+   ```
+   Open the provided local URL in Chrome or Comet on a desktop display.
+
+## Routing Best Practices
+
+The frontend routing is structured to reflect standard React SPA patterns, separating concerns into distinct pages:
+- `/` or `/workspace` - The main application workspace for tailoring active job applications.
+- `/profile` - The master profile editor for managing base resumes and career history.
+- `/history` - The archive of past applications and generated cover letters.
+- `/components` - The living design system and component library.
+
+*(Note: If running in extension mode, routing may adapt to memory-based or hash-based routing to accommodate Chrome Extension environment constraints, but browser-based usage relies on standard History API routing).*
+
+## Python Genkit Backend Integration
+
+The React frontend communicates with a Python Genkit backend via RESTful APIs. The backend handles:
+- **`jobParser` flow:** Ingesting raw job descriptions and extracting structured criteria.
+- **`matchAnalysis` flow:** Comparing the user's master profile against the extracted job criteria to identify gaps and generate tailored cover letters.
+
+Ensure your Python backend is running and accessible to the Vite dev server (typically via a proxy configured in `vite.config.ts`) to enable full AI functionality.
