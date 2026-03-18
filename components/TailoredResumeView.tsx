@@ -202,7 +202,7 @@ export const TailoredResumeView: React.FC<TailoredResumeViewProps> = ({ careerDa
                             <button
                               onClick={() => handlePolish(ach.Achievement_ID, 'Outcome')}
                               disabled={isPolishing === `${ach.Achievement_ID}-Outcome`}
-                              className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-500 hover:text-cyan-600"
+                              className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-[var(--sys-color-paperWhite-base)] hover:bg-[var(--sys-color-paperWhite-steps-1)] rounded text-[var(--sys-color-worker-ash-base)] hover:text-cyan-600"
                               title="AI Polish Outcome"
                             >
                               {isPolishing === `${ach.Achievement_ID}-Outcome` ? (
@@ -331,7 +331,7 @@ export const TailoredResumeView: React.FC<TailoredResumeViewProps> = ({ careerDa
                               <button
                                 onClick={() => handlePolish(ach.Achievement_ID, 'Outcome')}
                                 disabled={isPolishing === `${ach.Achievement_ID}-Outcome`}
-                                className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-500 hover:text-cyan-600"
+                                className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-[var(--sys-color-paperWhite-base)] hover:bg-[var(--sys-color-paperWhite-steps-1)] rounded text-[var(--sys-color-worker-ash-base)] hover:text-cyan-600"
                                 title="AI Polish Outcome"
                               >
                                 {isPolishing === `${ach.Achievement_ID}-Outcome` ? (

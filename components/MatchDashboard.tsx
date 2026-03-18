@@ -317,14 +317,14 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
   if (!analysis && !isLoading) {
     return (
       <div className="max-w-4xl mx-auto text-center py-12">
-        <div className="bg-gray-800 p-10 rounded-2xl border border-gray-700 shadow-2xl">
+        <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] p-10 rounded-2xl border border-[var(--sys-color-concreteGrey-steps-0)] shadow-2xl">
           <div className="w-20 h-20 bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto mb-6 border border-cyan-500/30">
             <svg className="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Job Extracted Successfully</h2>
-          <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+          <p className="text-[var(--sys-color-worker-ash-base)] mb-8 max-w-lg mx-auto">
             We've analyzed the job posting. Now, let's see how your career database matches up and generate your tailored application materials.
           </p>
           <button
@@ -346,7 +346,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
           <div className="absolute inset-0 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Analyzing Match...</h2>
-        <p className="text-gray-400 animate-pulse">Gemini is researching the company and tailoring your profile.</p>
+        <p className="text-[var(--sys-color-worker-ash-base)] animate-pulse">Gemini is researching the company and tailoring your profile.</p>
       </div>
     );
   }
@@ -361,7 +361,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
       {/* Score Header */}
-      <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 flex items-center gap-8">
+      <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] p-8 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)] flex items-center gap-8">
         <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="45" fill="none" stroke="#374151" strokeWidth="10" />
@@ -375,33 +375,33 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-3xl font-bold text-white">{analysis.Overall_Fit_Score}%</span>
-            <span className="text-xs text-gray-400 uppercase tracking-wider">Fit Score</span>
+            <span className="text-xs text-[var(--sys-color-worker-ash-base)] uppercase tracking-wider">Fit Score</span>
           </div>
         </div>
         <div>
           <h2 className="text-3xl font-bold text-white mb-2">Match Analysis Complete</h2>
-          <p className="text-gray-400 text-lg">
+          <p className="text-[var(--sys-color-worker-ash-base)] text-lg">
             Your profile is a <strong>{analysis.Overall_Fit_Score >= 80 ? 'strong' : analysis.Overall_Fit_Score >= 60 ? 'moderate' : 'weak'} match</strong> for the {job.Job_Title} role at {job.Company_Name}.
           </p>
         </div>
       </div>
 
       {/* Template Selector */}
-      <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+      <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] p-6 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)]">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-sm font-bold text-cyan-500 uppercase tracking-widest">Select Document Template</h3>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Locale:</span>
-            <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-700">
+            <span className="text-xs font-bold text-[var(--sys-color-worker-ash-base)] uppercase tracking-wider">Locale:</span>
+            <div className="flex bg-[var(--sys-color-charcoalBackground-base)] rounded-lg p-1 border border-[var(--sys-color-concreteGrey-steps-0)]">
               <button
                 onClick={() => setLocale('US')}
-                className={`px-3 py-1 rounded text-xs font-bold transition-colors ${locale === 'US' ? 'bg-cyan-600 text-white' : 'text-gray-400 hover:text-gray-200'}`}
+                className={`px-3 py-1 rounded text-xs font-bold transition-colors ${locale === 'US' ? 'bg-cyan-600 text-white' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'}`}
               >
                 US
               </button>
               <button
                 onClick={() => setLocale('UK/AU')}
-                className={`px-3 py-1 rounded text-xs font-bold transition-colors ${locale === 'UK/AU' ? 'bg-cyan-600 text-white' : 'text-gray-400 hover:text-gray-200'}`}
+                className={`px-3 py-1 rounded text-xs font-bold transition-colors ${locale === 'UK/AU' ? 'bg-cyan-600 text-white' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'}`}
               >
                 UK/AU
               </button>
@@ -414,7 +414,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
               key={t.id}
               onClick={() => setSelectedTemplate(t)}
               className={`group flex flex-col items-center gap-2 p-2 rounded-lg border transition-all ${
-                selectedTemplate.id === t.id ? 'bg-cyan-900/20 border-cyan-500' : 'bg-gray-900/50 border-gray-700 hover:border-gray-500'
+                selectedTemplate.id === t.id ? 'bg-cyan-900/20 border-cyan-500' : 'bg-[var(--sys-color-charcoalBackground-base)] border-[var(--sys-color-concreteGrey-steps-0)] hover:border-[var(--sys-color-concreteGrey-steps-0)]'
               }`}
             >
               <div 
@@ -429,7 +429,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
                   <div className="h-0.5 w-4/5 rounded-full" style={{ backgroundColor: t.textColor, opacity: 0.1 }} />
                 </div>
               </div>
-              <span className={`text-[10px] font-bold truncate w-full text-center ${selectedTemplate.id === t.id ? 'text-cyan-400' : 'text-gray-400 group-hover:text-gray-200'}`}>
+              <span className={`text-[10px] font-bold truncate w-full text-center ${selectedTemplate.id === t.id ? 'text-cyan-400' : 'text-[var(--sys-color-worker-ash-base)] group-hover:text-[var(--sys-color-paperWhite-base)]'}`}>
                 {t.name}
               </span>
             </button>
@@ -438,12 +438,12 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
       </div>
 
       {/* Tabs and Export */}
-      <div className="flex flex-col md:flex-row justify-between items-end border-b border-gray-700 pb-2 sticky top-0 bg-gray-900 z-40 pt-4">
+      <div className="flex flex-col md:flex-row justify-between items-end border-b border-[var(--sys-color-concreteGrey-steps-0)] pb-2 sticky top-0 bg-[var(--sys-color-charcoalBackground-base)] z-40 pt-4">
         <div className="flex gap-2 md:gap-4 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
           <button
             onClick={() => setActiveTab('analysis')}
             className={`px-3 md:px-4 py-2 font-bold rounded-t-lg transition-colors whitespace-nowrap ${
-              activeTab === 'analysis' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
+              activeTab === 'analysis' ? 'bg-[var(--sys-color-charcoalBackground-steps-1)] text-cyan-400 border-t border-l border-r border-[var(--sys-color-concreteGrey-steps-0)]' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'
             }`}
           >
             Gap Analysis
@@ -451,7 +451,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
           <button
             onClick={() => setActiveTab('resume')}
             className={`px-3 md:px-4 py-2 font-bold rounded-t-lg transition-colors whitespace-nowrap ${
-              activeTab === 'resume' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
+              activeTab === 'resume' ? 'bg-[var(--sys-color-charcoalBackground-steps-1)] text-cyan-400 border-t border-l border-r border-[var(--sys-color-concreteGrey-steps-0)]' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'
             }`}
           >
             Tailored Resume
@@ -459,7 +459,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
           <button
             onClick={() => setActiveTab('coverLetter')}
             className={`px-3 md:px-4 py-2 font-bold rounded-t-lg transition-colors whitespace-nowrap ${
-              activeTab === 'coverLetter' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
+              activeTab === 'coverLetter' ? 'bg-[var(--sys-color-charcoalBackground-steps-1)] text-cyan-400 border-t border-l border-r border-[var(--sys-color-concreteGrey-steps-0)]' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'
             }`}
           >
             Cover Letter
@@ -468,7 +468,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
             <button
               onClick={() => setActiveTab('ksc')}
               className={`px-3 md:px-4 py-2 font-bold rounded-t-lg transition-colors whitespace-nowrap ${
-                activeTab === 'ksc' ? 'bg-gray-800 text-cyan-400 border-t border-l border-r border-gray-700' : 'text-gray-400 hover:text-gray-200'
+                activeTab === 'ksc' ? 'bg-[var(--sys-color-charcoalBackground-steps-1)] text-cyan-400 border-t border-l border-r border-[var(--sys-color-concreteGrey-steps-0)]' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'
               }`}
             >
               KSC Responses
@@ -490,7 +490,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
                 <button 
                   onClick={() => setShowAudit(!showAudit)}
                   className={`flex items-center gap-1.5 px-2 py-1 md:px-3 md:py-1 rounded text-xs md:text-sm font-bold transition-colors ${
-                    showAudit ? 'bg-cyan-600 text-white' : 'bg-gray-700 text-cyan-400 hover:bg-gray-600'
+                    showAudit ? 'bg-cyan-600 text-white' : 'bg-[var(--sys-color-charcoalBackground-steps-2)] text-cyan-400 hover:bg-[var(--sys-color-charcoalBackground-steps-3)]'
                   }`}
                 >
                   <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -507,7 +507,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
                   className={`flex items-center gap-1.5 px-2 py-1 md:px-3 md:py-1 rounded text-xs md:text-sm font-bold transition-colors ${
                     saveSuccess 
                       ? 'bg-green-600 text-white' 
-                      : 'bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-500/30'
+                      : 'bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] hover:bg-[var(--sys-color-kr-activistSmokeGreen-steps-1)] text-[var(--sys-color-kr-activistSmokeGreen-base)] border border-[var(--sys-color-kr-activistSmokeGreen-base)]'
                   }`}
                 >
                   {isSaving ? (
@@ -535,14 +535,14 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
                   )}
                 </button>
               )}
-              <span className="text-gray-400 text-xs md:text-sm hidden md:inline">Export:</span>
+              <span className="text-[var(--sys-color-worker-ash-base)] text-xs md:text-sm hidden md:inline">Export:</span>
               <button 
                 onClick={() => {
                   const text = activeTab === 'resume' ? getResumeText() : activeTab === 'coverLetter' ? coverLetterContent : analysis?.KSC_Responses_Drafts?.map(k => `${k.KSC_Prompt}\n${k.Response}`).join('\n\n') || '';
                   navigator.clipboard.writeText(text);
                   alert('Copied to clipboard for ATS parsing!');
                 }}
-                className="bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-500/30 px-2 py-1 md:px-3 rounded text-xs md:text-sm font-bold transition-colors"
+                className="bg-[var(--sys-color-kr-activistSmokeGreen-steps-0)] hover:bg-[var(--sys-color-kr-activistSmokeGreen-steps-1)] text-[var(--sys-color-kr-activistSmokeGreen-base)] border border-[var(--sys-color-kr-activistSmokeGreen-base)] px-2 py-1 md:px-3 rounded text-xs md:text-sm font-bold transition-colors"
                 title="Copy Text"
               >
                 Copy
@@ -561,8 +561,8 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
       {activeTab === 'analysis' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Skill Gaps */}
-          <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-            <h3 className="text-xl font-bold text-cyan-300 mb-4 border-b border-gray-700 pb-2">Skill Gap Analysis</h3>
+          <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] p-6 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)]">
+            <h3 className="text-xl font-bold text-cyan-300 mb-4 border-b border-[var(--sys-color-concreteGrey-steps-0)] pb-2">Skill Gap Analysis</h3>
             <div className="space-y-3">
               {analysis.Skill_Gaps.map((gap, i) => {
                 const levelStyles = {
@@ -597,7 +597,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
                         {gap.Match_Level}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-400 pl-5 border-l-2 border-gray-700 ml-1.5 py-1">
+                    <p className="text-sm text-[var(--sys-color-worker-ash-base)] pl-5 border-l-2 border-[var(--sys-color-concreteGrey-steps-0)] ml-1.5 py-1">
                       {gap.Evidence || 'No direct evidence found in the provided documents.'}
                     </p>
                   </div>
@@ -608,9 +608,9 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
 
           <div className="space-y-8">
             {/* Tailored Summary */}
-            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-              <h3 className="text-xl font-bold text-cyan-300 mb-4 border-b border-gray-700 pb-2">Tailored Resume Summary</h3>
-              <p className="text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded border border-gray-700/50 mb-4">
+            <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] p-6 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)]">
+              <h3 className="text-xl font-bold text-cyan-300 mb-4 border-b border-[var(--sys-color-concreteGrey-steps-0)] pb-2">Tailored Resume Summary</h3>
+              <p className="text-[var(--sys-color-paperWhite-base)] leading-relaxed bg-[var(--sys-color-charcoalBackground-base)] p-4 rounded border border-[var(--sys-color-concreteGrey-steps-0)] mb-4">
                 {analysis.Tailored_Summary}
               </p>
               <button 
@@ -622,11 +622,11 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
             </div>
 
             {/* Recommended Achievements */}
-            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-              <h3 className="text-xl font-bold text-cyan-300 mb-4 border-b border-gray-700 pb-2">Top Achievements to Include</h3>
+            <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] p-6 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)]">
+              <h3 className="text-xl font-bold text-cyan-300 mb-4 border-b border-[var(--sys-color-concreteGrey-steps-0)] pb-2">Top Achievements to Include</h3>
               <ul className="space-y-3">
                 {recommendedAchievements.map((ach, i) => ach && (
-                  <li key={i} className="text-gray-300 text-sm bg-gray-900/50 p-3 rounded border border-gray-700/50 flex gap-3">
+                  <li key={i} className="text-[var(--sys-color-paperWhite-base)] text-sm bg-[var(--sys-color-charcoalBackground-base)] p-3 rounded border border-[var(--sys-color-concreteGrey-steps-0)] flex gap-3">
                     <span className="text-cyan-500 font-bold">•</span>
                     <span>{ach.Action_Verb} {ach.Noun_Task} {ach.Strategy} resulting in {ach.Outcome}.</span>
                   </li>
@@ -674,7 +674,7 @@ export const MatchDashboard: React.FC<MatchDashboardProps> = ({ careerData, job,
           <div className="xl:col-span-2 bg-white p-10 shadow-lg" style={{ fontFamily: selectedTemplate.fontSans, color: selectedTemplate.textColor }}>
             <h1 className="text-3xl font-bold uppercase mb-8 border-b-2 pb-4" style={{ color: selectedTemplate.primaryColor, borderColor: selectedTemplate.primaryColor }}>Cover Letter</h1>
             <textarea 
-              className="w-full h-[600px] bg-transparent text-gray-800 p-0 border-none focus:outline-none leading-relaxed resize-none"
+              className="w-full h-[600px] bg-transparent text-[var(--sys-color-charcoalBackground-base)] p-0 border-none focus:outline-none leading-relaxed resize-none"
               value={coverLetterContent}
               onChange={(e) => setCoverLetterContent(e.target.value)}
             />

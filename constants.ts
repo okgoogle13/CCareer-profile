@@ -21,8 +21,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#0f172a', // slate-900
     secondaryColor: '#475569', // slate-600
     accentColor: '#0ea5e9', // sky-500
-    fontSans: "'Inter', sans-serif",
-    fontSerif: "'Inter', sans-serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Work Sans', sans-serif",
     headingColor: '#0f172a',
     textColor: '#334155',
     borderColor: '#e2e8f0',
@@ -35,8 +35,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#1e3a8a', // navy-900
     secondaryColor: '#1e40af', // navy-800
     accentColor: '#1d4ed8', // navy-700
-    fontSans: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-    fontSerif: "'Georgia', serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Fraunces', serif",
     headingColor: '#1e3a8a',
     textColor: '#1f2937',
     borderColor: '#d1d5db',
@@ -49,8 +49,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#0f172a',
     secondaryColor: '#475569',
     accentColor: '#0ea5e9',
-    fontSans: "'Inter', sans-serif",
-    fontSerif: "'Inter', sans-serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Work Sans', sans-serif",
     headingColor: '#0f172a',
     textColor: '#334155',
     borderColor: '#e2e8f0',
@@ -63,8 +63,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#1e3a8a',
     secondaryColor: '#1e40af',
     accentColor: '#1d4ed8',
-    fontSans: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-    fontSerif: "'Georgia', serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Fraunces', serif",
     headingColor: '#1e3a8a',
     textColor: '#1f2937',
     borderColor: '#d1d5db',
@@ -77,8 +77,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#171717', // neutral-900
     secondaryColor: '#404040', // neutral-700
     accentColor: '#737373', // neutral-500
-    fontSans: "'Inter', sans-serif",
-    fontSerif: "'Inter', sans-serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Work Sans', sans-serif",
     headingColor: '#171717',
     textColor: '#262626',
     borderColor: '#e5e5e5',
@@ -91,8 +91,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#064e3b', // emerald-900
     secondaryColor: '#065f46', // emerald-800
     accentColor: '#10b981', // emerald-500
-    fontSans: "'Inter', sans-serif",
-    fontSerif: "'Libre Baskerville', serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Libre Bodoni', serif",
     headingColor: '#064e3b',
     textColor: '#111827',
     borderColor: '#d1fae5',
@@ -105,8 +105,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#7f1d1d', // red-900
     secondaryColor: '#991b1b', // red-800
     accentColor: '#dc2626', // red-600
-    fontSans: "'Inter', sans-serif",
-    fontSerif: "'Playfair Display', serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Libre Bodoni', serif",
     headingColor: '#7f1d1d',
     textColor: '#111827',
     borderColor: '#fee2e2',
@@ -120,7 +120,7 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     secondaryColor: '#3730a3', // indigo-800
     accentColor: '#6366f1', // indigo-500
     fontSans: "'JetBrains Mono', monospace",
-    fontSerif: "'Inter', sans-serif",
+    fontSerif: "'Work Sans', sans-serif",
     headingColor: '#312e81',
     textColor: '#1e293b',
     borderColor: '#e0e7ff',
@@ -133,8 +133,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#44403c', // stone-800
     secondaryColor: '#78716c', // stone-600
     accentColor: '#d97706', // amber-600
-    fontSans: "'Inter', sans-serif",
-    fontSerif: "'Cormorant Garamond', serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Fraunces', serif",
     headingColor: '#44403c',
     textColor: '#292524',
     borderColor: '#e7e5e4',
@@ -147,8 +147,8 @@ export const RESUME_TEMPLATES: TemplateStyle[] = [
     primaryColor: '#4c1d95', // violet-900
     secondaryColor: '#5b21b6', // violet-800
     accentColor: '#8b5cf6', // violet-500
-    fontSans: "'Inter', sans-serif",
-    fontSerif: "'Inter', sans-serif",
+    fontSans: "'Work Sans', sans-serif",
+    fontSerif: "'Work Sans', sans-serif",
     headingColor: '#4c1d95',
     textColor: '#1f2937',
     borderColor: '#ede9fe',

@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppShell } from './src/components/layout/AppShell';
 import { ApplicationWorkspacePage } from './src/pages/ApplicationWorkspacePage';
 import { ProfileEditorPage } from './src/pages/ProfileEditorPage';
@@ -13,16 +12,28 @@ import { useChromeExtension } from './hooks/useChromeExtension';
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'workspace' | 'profile' | 'past' | 'components'>('workspace');
   const { isExtension } = useChromeExtension();
 
   // Auth Listener
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setIsAuthLoading(false);
+      if (timeoutId) clearTimeout(timeoutId);
     });
 
-    return () => unsubscribe();
+    // Fallback: if auth takes too long (e.g. config missing), stop loading
+    timeoutId = setTimeout(() => {
+      setIsAuthLoading(false);
+    }, 5000);
+
+    return () => {
+      unsubscribe();
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [isExtension]);
 
   const handleLogin = async () => {
@@ -35,6 +46,7 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     await logout();
+    setActiveTab('workspace');
   };
 
   if (isAuthLoading) {
@@ -66,18 +78,12 @@ const App: React.FC = () => {
   }
 
   return (
-    <BrowserRouter>
-      <AppShell onLogout={handleLogout}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/workspace" replace />} />
-          <Route path="/workspace" element={<ApplicationWorkspacePage />} />
-          <Route path="/profile" element={<ProfileEditorPage />} />
-          <Route path="/past" element={<PastApplicationsPage />} />
-          <Route path="/components" element={<ComponentLibraryPage />} />
-          <Route path="*" element={<Navigate to="/workspace" replace />} />
-        </Routes>
-      </AppShell>
-    </BrowserRouter>
+    <AppShell activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout}>
+      {activeTab === 'workspace' && <ApplicationWorkspacePage />}
+      {activeTab === 'profile' && <ProfileEditorPage />}
+      {activeTab === 'past' && <PastApplicationsPage />}
+      {activeTab === 'components' && <ComponentLibraryPage />}
+    </AppShell>
   );
 };
 

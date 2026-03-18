@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "UserCareerData": {
+      "title": "User Career Data",
+      "description": "Stores a user's career history, skills, and achievements.",
+      "type": "object",
+      "properties": {
+        "career_data": {
+          "type": "object",
+          "description": "The structured career data including achievements and skills."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the data was last updated."
+        },
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier of the user."
+        }
+      },
+      "required": ["career_data", "updated_at", "uid"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserCareerData",
+      "description": "A collection of user-specific career data documents."
+    }
+  }
+}

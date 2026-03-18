@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ATSScoreResult, DocumentType } from '../types';
+import type { ATSScoreResult, DocumentType } from '../../../types/analysis';
 
 interface ATSScoreCardProps {
   score: ATSScoreResult | null;
@@ -11,34 +11,34 @@ interface ATSScoreCardProps {
 export function ATSScoreCard({ score, isCalculating, documentType }: ATSScoreCardProps) {
   const getScoreColor = (value: number) => {
     if (documentType === 'coverLetter') {
-      if (value >= 90) return 'text-emerald-500';
-      if (value >= 80) return 'text-emerald-400';
-      if (value >= 70) return 'text-amber-500';
-      return 'text-rose-500';
+      if (value >= 90) return 'text-[var(--sys-color-kr-activistSmokeGreen-base)]';
+      if (value >= 80) return 'text-[var(--sys-color-kr-activistSmokeGreen-base)]';
+      if (value >= 70) return 'text-[var(--sys-color-stencilYellow-base)]';
+      return 'text-[var(--sys-color-solidarityRed-base)]';
     }
-    if (value >= 80) return 'text-emerald-500';
-    if (value >= 60) return 'text-amber-500';
-    return 'text-rose-500';
+    if (value >= 80) return 'text-[var(--sys-color-kr-activistSmokeGreen-base)]';
+    if (value >= 60) return 'text-[var(--sys-color-stencilYellow-base)]';
+    return 'text-[var(--sys-color-solidarityRed-base)]';
   };
 
   const getScoreBg = (value: number) => {
     if (documentType === 'coverLetter') {
-      if (value >= 90) return 'stroke-emerald-500';
-      if (value >= 80) return 'stroke-emerald-400';
-      if (value >= 70) return 'stroke-amber-500';
-      return 'stroke-rose-500';
+      if (value >= 90) return 'var(--sys-color-kr-activistSmokeGreen-base)';
+      if (value >= 80) return 'var(--sys-color-kr-activistSmokeGreen-base)';
+      if (value >= 70) return 'var(--sys-color-stencilYellow-base)';
+      return 'var(--sys-color-solidarityRed-base)';
     }
-    if (value >= 80) return 'stroke-emerald-500';
-    if (value >= 60) return 'stroke-amber-500';
-    return 'stroke-rose-500';
+    if (value >= 80) return 'var(--sys-color-kr-activistSmokeGreen-base)';
+    if (value >= 60) return 'var(--sys-color-stencilYellow-base)';
+    return 'var(--sys-color-solidarityRed-base)';
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl">
+    <div className="shadow-xl" style={{ background: 'var(--sys-color-charcoalBackground-steps-1)', borderColor: 'var(--sys-color-concreteGrey-steps-0)', borderRadius: 'var(--sys-shape-blockRiot03)', borderWidth: 1, borderStyle: 'solid', padding: '1.5rem' }}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-white">ATS Score ({documentType === 'resume' ? 'Resume' : 'Cover Letter'})</h3>
+        <h3 className="text-lg font-bold text-[var(--sys-color-paperWhite-base)]">ATS Score ({documentType === 'resume' ? 'Resume' : 'Cover Letter'})</h3>
         {isCalculating && (
-          <span className="text-xs text-cyan-400 animate-pulse">Calculating...</span>
+          <span className="text-xs text-[var(--sys-color-inkGold-base)] animate-pulse">Calculating...</span>
         )}
       </div>
 
@@ -50,9 +50,9 @@ export function ATSScoreCard({ score, isCalculating, documentType }: ATSScoreCar
         >
           <div className="grid grid-cols-2 gap-4 mb-6">
             {Object.entries(score.breakdown).map(([key, value]) => (
-              <div key={key} className="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
-                <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">{key.replace(/([A-Z])/g, ' $1')}</div>
-                <div className="text-xl font-bold text-white">{value}%</div>
+              <div key={key} className="p-3 shadow-sm" style={{ background: 'color-mix(in srgb, var(--sys-color-charcoalBackground-base) 85%, transparent)', borderColor: 'var(--sys-color-concreteGrey-steps-0)', borderRadius: 'var(--sys-shape-blockRiot02)', borderWidth: 1, borderStyle: 'solid' }}>
+                <div className="text-xs text-[var(--sys-color-worker-ash-base)] uppercase tracking-wider mb-1">{key.replace(/([A-Z])/g, ' $1')}</div>
+                <div className="text-xl font-bold text-[var(--sys-color-paperWhite-base)]">{value}%</div>
               </div>
             ))}
           </div>
@@ -60,16 +60,17 @@ export function ATSScoreCard({ score, isCalculating, documentType }: ATSScoreCar
             <span className={`text-6xl font-black ${getScoreColor(score.overallScore)}`}>
               {score.overallScore}%
             </span>
-            <p className="text-sm text-gray-400 mt-2">
+            <p className="text-sm text-[var(--sys-color-worker-ash-base)] mt-2">
               This score is equivalent to industry-standard ATS compliance scanners. It is not an arbitrary calculation.
             </p>
           </div>
           <div className="relative w-32 h-32 mx-auto">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="#374151" strokeWidth="8" />
+              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--sys-color-charcoalBackground-steps-2)" strokeWidth="8" />
               <circle 
                 cx="50" cy="50" r="45" fill="none" 
-                className={`transition-all duration-1000 ease-out ${getScoreBg(score.overallScore)}`}
+                className={`transition-all duration-1000 ease-out`}
+                style={{ stroke: getScoreBg(score.overallScore) }}
                 strokeWidth="8" 
                 strokeDasharray={`${score.overallScore * 2.827} 282.7`} 
               />
@@ -81,7 +82,7 @@ export function ATSScoreCard({ score, isCalculating, documentType }: ATSScoreCar
             </div>
           </div>
 
-          <p className="text-center mt-4 text-sm text-gray-400">
+          <p className="text-center mt-4 text-sm text-[var(--sys-color-worker-ash-base)]">
             {documentType === 'coverLetter' ? (
               <>
                 {score.overallScore >= 90 && 'Excellent match! Highly competitive for recruiter review.'}

@@ -162,13 +162,13 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose, o
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-slide-down">
-        <div className="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-900/50">
+      <div className="bg-[var(--sys-color-charcoalBackground-steps-1)] border border-[var(--sys-color-concreteGrey-steps-0)] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-slide-down">
+        <div className="p-6 border-b border-[var(--sys-color-concreteGrey-steps-0)] flex justify-between items-center bg-[var(--sys-color-charcoalBackground-base)]">
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
             <DocumentTextIcon className="w-6 h-6 text-cyan-400" />
             User Profile & Master Data
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+          <button onClick={onClose} className="text-[var(--sys-color-worker-ash-base)] hover:text-white text-2xl leading-none">&times;</button>
         </div>
 
         <div className="p-8">
@@ -180,30 +180,30 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose, o
                 className="w-24 h-24 rounded-full border-4 border-cyan-500/20 mb-4 shadow-lg"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center mb-4 border-4 border-cyan-500/20 shadow-lg">
+              <div className="w-24 h-24 rounded-full bg-[var(--sys-color-charcoalBackground-steps-2)] flex items-center justify-center mb-4 border-4 border-cyan-500/20 shadow-lg">
                  <span className="text-3xl font-bold text-cyan-400">{displayName?.charAt(0) || user.email?.charAt(0)}</span>
               </div>
             )}
             <h4 className="text-2xl font-bold text-white">{displayName || 'Anonymous User'}</h4>
-            <p className="text-gray-400">{user.email}</p>
+            <p className="text-[var(--sys-color-worker-ash-base)]">{user.email}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 text-center">
+            <div className="bg-[var(--sys-color-charcoalBackground-base)] p-4 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)] text-center">
               <p className="text-2xl font-bold text-cyan-400">{stats.entries}</p>
-              <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Entries</p>
+              <p className="text-[10px] uppercase tracking-widest text-[var(--sys-color-worker-ash-base)] font-bold">Entries</p>
             </div>
-            <div className="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 text-center">
+            <div className="bg-[var(--sys-color-charcoalBackground-base)] p-4 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)] text-center">
               <p className="text-2xl font-bold text-amber-400">{stats.achievements}</p>
-              <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Achievements</p>
+              <p className="text-[10px] uppercase tracking-widest text-[var(--sys-color-worker-ash-base)] font-bold">Achievements</p>
             </div>
-            <div className="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 text-center">
+            <div className="bg-[var(--sys-color-charcoalBackground-base)] p-4 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)] text-center">
               <p className="text-2xl font-bold text-purple-400">{stats.kscs}</p>
-              <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">STAR Responses</p>
+              <p className="text-[10px] uppercase tracking-widest text-[var(--sys-color-worker-ash-base)] font-bold">STAR Responses</p>
             </div>
-            <div className="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 text-center">
+            <div className="bg-[var(--sys-color-charcoalBackground-base)] p-4 rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)] text-center">
               <p className="text-2xl font-bold text-green-400">{stats.skills}</p>
-              <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Skills</p>
+              <p className="text-[10px] uppercase tracking-widest text-[var(--sys-color-worker-ash-base)] font-bold">Skills</p>
             </div>
           </div>
 
@@ -211,7 +211,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose, o
             <button 
               onClick={downloadMasterResume}
               disabled={!data}
-              className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-gray-700 disabled:to-gray-700 disabled:text-gray-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg group transform hover:scale-[1.02]"
+              className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-gray-700 disabled:to-gray-700 disabled:text-[var(--sys-color-worker-ash-base)] text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg group transform hover:scale-[1.02]"
             >
               <DocumentTextIcon className="w-6 h-6" />
               <span className="text-lg">Download Master Resume</span>
@@ -219,7 +219,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose, o
             <button 
               onClick={downloadJSON}
               disabled={!data}
-              className="w-full py-3 bg-gray-700/50 hover:bg-gray-700 disabled:bg-gray-800 disabled:text-gray-600 text-gray-300 font-medium rounded-xl transition-all flex items-center justify-center gap-2 border border-gray-600/50 hover:border-gray-500"
+              className="w-full py-3 bg-[var(--sys-color-charcoalBackground-steps-2)] hover:bg-[var(--sys-color-charcoalBackground-steps-2)] disabled:bg-[var(--sys-color-charcoalBackground-steps-1)] disabled:text-[var(--sys-color-worker-ash-base)] text-[var(--sys-color-paperWhite-base)] font-medium rounded-xl transition-all flex items-center justify-center gap-2 border border-[var(--sys-color-concreteGrey-steps-0)] hover:border-[var(--sys-color-concreteGrey-steps-0)]"
             >
               <ArrowPathIcon className="w-4 h-4" />
               <span>Export Raw JSON Database</span>
@@ -227,7 +227,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, data, onClose, o
             <button 
               onClick={handleDeleteData}
               disabled={isDeleting || !data}
-              className="w-full py-3 bg-red-900/40 hover:bg-red-800/60 disabled:bg-gray-800 disabled:text-gray-600 text-red-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 border border-red-500/30 hover:border-red-500/50 mt-4"
+              className="w-full py-3 bg-red-900/40 hover:bg-red-800/60 disabled:bg-[var(--sys-color-charcoalBackground-steps-1)] disabled:text-[var(--sys-color-worker-ash-base)] text-red-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 border border-red-500/30 hover:border-red-500/50 mt-4"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

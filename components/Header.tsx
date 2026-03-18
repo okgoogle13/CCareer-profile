@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, onProfi
   const photoURL = user?.photoURL;
 
   return (
-    <header className="p-4 border-b border-gray-700 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
+    <header className="p-4 border-b border-[var(--sys-color-concreteGrey-steps-0)] bg-[var(--sys-color-charcoalBackground-base)] backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
             <DocumentTextIcon className="w-8 h-8 text-cyan-400" />
@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, onProfi
                 <div className="flex items-center gap-3">
                     <div className="text-right hidden sm:block">
                         <p className="text-xs font-bold text-white">{displayName}</p>
-                        <p className="text-[10px] text-gray-400">{user.email}</p>
+                        <p className="text-[10px] text-[var(--sys-color-worker-ash-base)]">{user.email}</p>
                     </div>
                     {photoURL && (
                         <button 
@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, onProfi
                     )}
                     <button 
                         onClick={onLogout}
-                        className="text-xs text-gray-400 hover:text-red-400 transition-colors border border-gray-700 px-2 py-1 rounded"
+                        className="text-xs text-[var(--sys-color-worker-ash-base)] hover:text-red-400 transition-colors border border-[var(--sys-color-concreteGrey-steps-0)] px-2 py-1 rounded"
                     >
                         Logout
                     </button>

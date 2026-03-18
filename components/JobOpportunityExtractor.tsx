@@ -92,9 +92,9 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-xl">
+    <div className="max-w-2xl mx-auto p-6 bg-[var(--sys-color-charcoalBackground-steps-1)] rounded-xl border border-[var(--sys-color-concreteGrey-steps-0)] shadow-xl">
       <h3 className="text-2xl font-bold text-white mb-4">Extract Job Opportunity</h3>
-      <p className="text-gray-400 mb-6">
+      <p className="text-[var(--sys-color-worker-ash-base)] mb-6">
         Paste a URL, plain text, or search for a live job posting to automatically extract its key particulars.
       </p>
       
@@ -102,7 +102,7 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
         <div className="mb-6 p-4 bg-cyan-900/30 border border-cyan-500/30 rounded-lg flex items-center justify-between">
           <div>
             <h4 className="text-cyan-400 font-bold mb-1">Current Page</h4>
-            <p className="text-sm text-gray-400 truncate max-w-md">{currentUrl || 'Loading...'}</p>
+            <p className="text-sm text-[var(--sys-color-worker-ash-base)] truncate max-w-md">{currentUrl || 'Loading...'}</p>
           </div>
           <button
             onClick={handleExtractFromPage}
@@ -114,33 +114,33 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-4 mb-4 border-b border-gray-700 pb-4 justify-between items-start md:items-center">
+      <div className="flex flex-col md:flex-row gap-4 mb-4 border-b border-[var(--sys-color-concreteGrey-steps-0)] pb-4 justify-between items-start md:items-center">
         <div className="flex gap-2 md:gap-4 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
           <button 
             onClick={() => setInputType('url')}
-            className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${inputType === 'url' ? 'bg-cyan-900/50 text-cyan-400 border border-cyan-500/50' : 'text-gray-400 hover:text-gray-200'}`}
+            className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${inputType === 'url' ? 'bg-cyan-900/50 text-cyan-400 border border-cyan-500/50' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'}`}
           >
             Paste URL
           </button>
           <button 
             onClick={() => setInputType('text')}
-            className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${inputType === 'text' ? 'bg-cyan-900/50 text-cyan-400 border border-cyan-500/50' : 'text-gray-400 hover:text-gray-200'}`}
+            className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${inputType === 'text' ? 'bg-cyan-900/50 text-cyan-400 border border-cyan-500/50' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'}`}
           >
             Paste Text
           </button>
           <button 
             onClick={() => setInputType('search')}
-            className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${inputType === 'search' ? 'bg-cyan-900/50 text-cyan-400 border border-cyan-500/50' : 'text-gray-400 hover:text-gray-200'}`}
+            className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${inputType === 'search' ? 'bg-cyan-900/50 text-cyan-400 border border-cyan-500/50' : 'text-[var(--sys-color-worker-ash-base)] hover:text-[var(--sys-color-paperWhite-base)]'}`}
           >
             AI Search
           </button>
         </div>
-        <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer whitespace-nowrap">
+        <label className="flex items-center gap-2 text-sm text-[var(--sys-color-worker-ash-base)] cursor-pointer whitespace-nowrap">
           <input 
             type="checkbox" 
             checked={ignoreCriteria} 
             onChange={(e) => setIgnoreCriteria(e.target.checked)}
-            className="rounded border-gray-600 text-cyan-500 focus:ring-cyan-500 bg-gray-700"
+            className="rounded border-[var(--sys-color-concreteGrey-steps-0)] text-cyan-500 focus:ring-cyan-500 bg-[var(--sys-color-charcoalBackground-steps-2)]"
           />
           Ignore Strict Criteria
         </label>
@@ -155,16 +155,16 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="e.g., Frontend Developer in New York"
-                        className="flex-1 bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                        className="flex-1 bg-[var(--sys-color-charcoalBackground-base)] border border-[var(--sys-color-concreteGrey-steps-0)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
                     />
                     <button onClick={handleSearch} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg">Search</button>
                 </div>
                 {searchResults.length > 0 && (
                     <div className="space-y-2">
                         {searchResults.map((res, i) => (
-                            <div key={i} className="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600" onClick={() => handleExtract(res.url)}>
+                            <div key={i} className="p-3 bg-[var(--sys-color-charcoalBackground-steps-2)] rounded-lg cursor-pointer hover:bg-[var(--sys-color-charcoalBackground-steps-3)]" onClick={() => handleExtract(res.url)}>
                                 <h5 className="font-bold text-white">{res.title}</h5>
-                                <p className="text-sm text-gray-300">{res.company}</p>
+                                <p className="text-sm text-[var(--sys-color-paperWhite-base)]">{res.company}</p>
                             </div>
                         ))}
                     </div>
@@ -177,7 +177,7 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com/job-posting"
-            className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+            className="w-full bg-[var(--sys-color-charcoalBackground-base)] border border-[var(--sys-color-concreteGrey-steps-0)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
             disabled={isLoading}
           />
         )}
@@ -186,7 +186,7 @@ export const JobOpportunityExtractor: React.FC<JobOpportunityExtractorProps> = (
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Paste the full job description text here..."
-            className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 min-h-[200px]"
+            className="w-full bg-[var(--sys-color-charcoalBackground-base)] border border-[var(--sys-color-concreteGrey-steps-0)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 min-h-[200px]"
             disabled={isLoading}
           />
         )}

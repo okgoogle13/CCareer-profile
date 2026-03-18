@@ -10,7 +10,7 @@ interface KSCResponsesViewProps {
 export const KSCResponsesView: React.FC<KSCResponsesViewProps> = ({ analysis, template }) => {
   if (!analysis.KSC_Responses_Drafts || analysis.KSC_Responses_Drafts.length === 0) {
     return (
-      <div className="bg-white p-10 shadow-lg max-w-4xl mx-auto text-center text-gray-500 italic">
+      <div className="bg-white p-10 shadow-lg max-w-4xl mx-auto text-center text-[var(--sys-color-worker-ash-base)] italic">
         No Key Selection Criteria responses generated for this role.
       </div>
     );
