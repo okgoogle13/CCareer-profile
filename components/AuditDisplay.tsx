@@ -1,5 +1,5 @@
 import React from 'react';
-import type { DocumentAudit } from '../../../types/analysis';
+import type { DocumentAudit } from '../types';
 
 interface AuditDisplayProps {
   audit: DocumentAudit;

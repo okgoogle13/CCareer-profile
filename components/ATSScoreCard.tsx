@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import type { ATSScoreResult, DocumentType } from '../../../types/analysis';
+import type { ATSScoreResult, DocumentType } from '../types';
 
 interface ATSScoreCardProps {
   score: ATSScoreResult | null;
