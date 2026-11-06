@@ -80,7 +80,7 @@ const App: React.FC = () => {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout}>
       {activeTab === 'workspace' && <ApplicationWorkspacePage />}
-      {activeTab === 'profile' && <ProfileEditorPage />}
+      {activeTab === 'profile' && <ProfileEditorPage user={user} />}
       {activeTab === 'past' && <PastApplicationsPage />}
       {activeTab === 'components' && <ComponentLibraryPage />}
     </AppShell>
